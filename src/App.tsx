@@ -44,7 +44,9 @@ function App() {
 
   const handleToggleTodo = async (id: number) => {
     try {
-      await invoke("toggle_todo", { id });
+      const response = await invoke("toggle_todo", { id });
+
+      console.log("Toggle response:", response);
       setTodos((prevTodos) =>
         prevTodos.map((todo) =>
           todo.id === id ? { ...todo, completed: !todo.completed } : todo

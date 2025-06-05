@@ -74,12 +74,13 @@ pub fn add_todo(text: String, state: tauri::State<AppState>) -> Result<Todo, Str
 }
 
 #[tauri::command]
-pub fn toggle_todo(id: u32, state: tauri::State<AppState>) -> Result<(), String> {
+pub fn toggle_todo(id: u32, state: tauri::State<AppState>) -> Result<Todo, String> {
     let mut todos_guard = state.todos.lock().unwrap();
     if let Some(todo) = todos_guard.iter_mut().find(|t| t.id == id) {
         todo.completed = !todo.completed;
+        let cloned_todo = todo.clone();
         save_todos_to_disk(&state.data_file_path, &todos_guard)?;
-        Ok(())
+        Ok(cloned_todo)
     } else {
         Err(format!("Todo with id {} not found", id))
     }
