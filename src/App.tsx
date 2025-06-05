@@ -1,5 +1,6 @@
 // Import styles of packages that you've installed.
 // All packages except `@mantine/hooks` require styles imports
+import "./App.css";
 import "@mantine/core/styles.css";
 
 import { MantineProvider } from "@mantine/core";

@@ -1,5 +1,6 @@
 import { Group, Stack } from "@mantine/core";
 import { NavLink } from "react-router";
+import css from "./Layout.module.css";
 
 type Props = {
   children: React.ReactNode;
@@ -7,7 +8,7 @@ type Props = {
 
 const Layout = ({ children, ...props }: Props) => {
   return (
-    <Stack {...props}>
+    <Stack className={css.layout} {...props}>
       <Group>
         <NavLink to="/" style={{ textDecoration: "none" }}>
           Todos
