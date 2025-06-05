@@ -1,24 +1,47 @@
-import { Group, Stack } from "@mantine/core";
+import {
+  AppShell,
+  Group,
+  Burger,
+  NavLink as MantineNavLink
+} from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 import { NavLink } from "react-router";
-import css from "./Layout.module.css";
 
 type Props = {
   children: React.ReactNode;
-} & React.ComponentProps<typeof Stack>;
+};
 
-const Layout = ({ children, ...props }: Props) => {
+const Layout = ({ children }: Props) => {
+  const [opened, { toggle }] = useDisclosure();
+
   return (
-    <Stack className={css.layout} {...props}>
-      <Group>
-        <NavLink to="/" style={{ textDecoration: "none" }}>
-          Todos
-        </NavLink>
-        <NavLink to="/saved-dirs" style={{ textDecoration: "none" }}>
-          Saved Dirs
-        </NavLink>
-      </Group>
-      <main>{children}</main>
-    </Stack>
+    <AppShell
+      header={{ height: 60 }}
+      navbar={{ width: 300, breakpoint: "sm", collapsed: { mobile: !opened } }}
+      padding="md"
+    >
+      <AppShell.Header>
+        <Group h="100%" px="md">
+          <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
+          <div style={{ fontWeight: "bold", fontSize: "1.2rem" }}>My App</div>
+        </Group>
+      </AppShell.Header>
+      <AppShell.Navbar p="md">
+        <MantineNavLink
+          component={NavLink}
+          to="/"
+          label="Todos"
+          style={{ textDecoration: "none" }}
+        />
+        <MantineNavLink
+          component={NavLink}
+          to="/saved-dirs"
+          label="Saved Dirs"
+          style={{ textDecoration: "none" }}
+        />
+      </AppShell.Navbar>
+      <AppShell.Main>{children}</AppShell.Main>
+    </AppShell>
   );
 };
 
