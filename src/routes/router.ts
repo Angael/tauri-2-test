@@ -1,6 +1,6 @@
 import { createBrowserRouter } from "react-router";
 import Todos from "./todos/Todos";
-import SavedDirs from "./saved-dirs/SavedDirs";
+import SavedDirs from "./saved-folders/SavedFolders";
 
 export const router = createBrowserRouter([
   {

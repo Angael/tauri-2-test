@@ -74,7 +74,7 @@ const Todos = (props: Props) => {
   return (
     <Layout>
       <h1>Tauri Todo App</h1>
-      <form onSubmit={handleAddTodo} style={{ marginBottom: "20px" }}>
+      <form onSubmit={handleAddTodo}>
         <input
           type="text"
           value={inputText}

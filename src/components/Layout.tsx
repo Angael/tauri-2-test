@@ -2,7 +2,9 @@ import {
   AppShell,
   Group,
   Burger,
-  NavLink as MantineNavLink
+  NavLink as MantineNavLink,
+  Container,
+  Stack
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { NavLink } from "react-router";
@@ -40,7 +42,11 @@ const Layout = ({ children }: Props) => {
           style={{ textDecoration: "none" }}
         />
       </AppShell.Navbar>
-      <AppShell.Main>{children}</AppShell.Main>
+      <AppShell.Main>
+        <Container>
+          <Stack>{children}</Stack>
+        </Container>
+      </AppShell.Main>
     </AppShell>
   );
 };
