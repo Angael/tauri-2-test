@@ -1,6 +1,4 @@
-// Prevents additional console window on Windows in release, DO NOT REMOVE!!
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-
+// TODO: Get rid of todos, not needed anymore
 // Add these imports at the top of src-tauri/src/main.rs
 use std::fs;
 use std::path::PathBuf;

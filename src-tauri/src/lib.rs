@@ -5,7 +5,7 @@ pub mod files_in_dirs;
 pub mod saved_folders;
 pub mod todo;
 
-use crate::app_state::AppState;
+use crate::{app_state::AppState, files_in_dirs::model::FilesInDirs};
 use commands::{add_todo, get_todos, greet, load_todos_from_disk, remove_todo, toggle_todo};
 use std::sync::Mutex;
 use tauri::Manager;
@@ -25,6 +25,7 @@ pub fn run() {
                 .expect("Failed to get application data directory. Please ensure it's configured.");
             let data_file_path = app_data_dir.join("todos.json");
             let saved_folders_path = app_data_dir.join("saved_folders.json");
+            let files_in_dirs_path = app_data_dir.join("files_in_dirs.json");
 
             // Print paths
             println!("Data file path: {}", data_file_path.display());
@@ -41,6 +42,10 @@ pub fn run() {
                 saved_folders_path,
 
                 saved_folders,
+                files_in_dirs: Mutex::new(
+                    FilesInDirs::load_from_disk(files_in_dirs_path)
+                        .expect("Failed to load files in directories"),
+                ),
                 todos: Mutex::new(initial_todos),
                 next_id: Mutex::new(max_id + 1),
             };

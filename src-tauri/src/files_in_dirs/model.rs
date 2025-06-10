@@ -12,6 +12,8 @@ pub struct DirWithFiles {
     pub files: Vec<File>,
 }
 
+// TODO: move loading files from FilesInDirs to DirWithFiles::new
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct FilesInDirs {
     pub dirs: Vec<DirWithFiles>,
@@ -51,4 +53,28 @@ impl FilesInDirs {
 
         files_in_dirs
     }
+
+    pub fn load_from_disk(path: std::path::PathBuf) -> Result<Self, String> {
+        if path.exists() {
+            let data =
+                std::fs::read_to_string(path).map_err(|e| format!("Failed to read file: {}", e))?;
+            serde_json::from_str(&data).map_err(|e| format!("Failed to parse JSON: {}", e))
+        } else {
+            Ok(FilesInDirs { dirs: Vec::new() })
+        }
+    }
+
+    pub fn save_to_disk(&self, path: std::path::PathBuf) -> Result<(), String> {
+        let data = serde_json::to_string(self)
+            .map_err(|e| format!("Failed to serialize FilesInDirs: {}", e))?;
+
+        if let Some(parent_dir) = path.parent() {
+            std::fs::create_dir_all(parent_dir)
+                .map_err(|e| format!("Failed to create directory: {}", e))?;
+        }
+
+        std::fs::write(&path, data).map_err(|e| format!("Failed to write to disk: {}", e))
+    }
+
+    // TODO: Add functions add_dir, rm_dir, rescan_dir, rescan_all
 }
