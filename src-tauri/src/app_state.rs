@@ -10,6 +10,7 @@ pub struct AppState {
     // Paths
     pub data_file_path: PathBuf,
     pub saved_folders_path: PathBuf,
+    pub files_in_dirs_path: PathBuf,
 
     // State
     pub files_in_dirs: Mutex<FilesInDirs>,

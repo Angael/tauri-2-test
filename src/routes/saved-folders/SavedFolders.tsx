@@ -4,58 +4,47 @@ import { invoke } from "@tauri-apps/api/core";
 import Layout from "../../components/Layout";
 import AddSavedFolder from "./AddSavedFolder";
 
-interface SavedFolder {
+interface File {
+  name: string;
+  size: number;
+}
+
+interface DirWithFiles {
   path: string;
+  files: File[];
+}
+
+interface FilesInDirs {
+  dirs: Array<DirWithFiles>;
 }
 
 const SavedDirs = () => {
-  const savedDirs = useQuery({
-    queryKey: ["get_saved_folders"],
+  const dirsQuery = useQuery({
+    queryKey: ["get_files_in_dirs"],
     queryFn: async () => {
-      const _folders = await invoke<SavedFolder[]>("get_saved_folders");
-      return _folders;
+      return await invoke<FilesInDirs>("get_files_in_dirs");
     }
-    // staleTime: Infinity
   });
 
   const addFolderMut = useMutation({
-    mutationKey: ["save_folders"],
-    mutationFn: async (path: string) => {
-      if (!savedDirs.data) {
-        return;
-      }
-
-      const newFolder = { path };
-
-      await invoke("save_folders", {
-        savedFolders: [...savedDirs.data, newFolder]
-      });
-    },
+    mutationKey: ["add_dir"],
+    mutationFn: async (path: string) => invoke("add_dir", { dir: path }),
     onSuccess: () => {
-      savedDirs.refetch();
+      dirsQuery.refetch();
     }
   });
 
   const removeFolderMut = useMutation({
     mutationKey: ["remove_saved_folder"],
-    mutationFn: async (path: string) => {
-      if (!savedDirs.data) {
-        return;
-      }
-
-      const updatedFolders = savedDirs.data.filter(
-        (folder) => folder.path !== path
-      );
-
-      await invoke("save_folders", { savedFolders: updatedFolders });
-    },
+    mutationFn: async (path: string) =>
+      await invoke("remove_dir", { dir: path }),
     onSuccess: () => {
-      savedDirs.refetch();
+      dirsQuery.refetch();
     }
   });
 
   const disableButtons =
-    savedDirs.isPending || addFolderMut.isPending || removeFolderMut.isPending;
+    dirsQuery.isPending || addFolderMut.isPending || removeFolderMut.isPending;
 
   return (
     <Layout>
@@ -63,10 +52,13 @@ const SavedDirs = () => {
         onAddFolder={addFolderMut.mutate}
         isPending={addFolderMut.isPending}
       />
-      {savedDirs.data?.map((dir, index) => (
+      {dirsQuery.data?.dirs.map((dir, index) => (
         <Group key={index}>
           <Text style={{ userSelect: "text" }}>{dir.path}</Text>
-          <Button variant="outline" disabled={disableButtons}>
+          <Text size="sm" c="gray" style={{ userSelect: "text" }}>
+            {dir.files.length} files
+          </Text>
+          <Button variant="outline" disabled={disableButtons} ml="auto">
             Edit
           </Button>
           <Button

@@ -40,6 +40,7 @@ pub fn run() {
             let app_state = AppState {
                 data_file_path,
                 saved_folders_path,
+                files_in_dirs_path: files_in_dirs_path.clone(),
 
                 saved_folders,
                 files_in_dirs: Mutex::new(
@@ -62,6 +63,9 @@ pub fn run() {
             remove_todo,
             saved_folders::save_folders,
             saved_folders::get_saved_folders,
+            files_in_dirs::commands::get_files_in_dirs,
+            files_in_dirs::commands::add_dir,
+            files_in_dirs::commands::remove_dir,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
