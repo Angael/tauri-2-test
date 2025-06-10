@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 
-use crate::commands::AppState;
+use crate::{commands::AppState, files_in_dirs::model::FilesInDirs};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SavedFolder {
@@ -16,9 +16,15 @@ pub fn get_saved_folders(state: tauri::State<AppState>) -> Result<Vec<SavedFolde
         .saved_folders
         .lock()
         .map_err(|e| format!("Failed to lock saved folders: {}", e))?;
-    println!("Saved folders: {:?}", state);
 
-    Ok(state.clone())
+    let clone = state.clone();
+
+    println!("Saved folders: {:?}", clone);
+
+    let files_in_dirs = FilesInDirs::new(clone.iter().map(|folder| folder.path.clone()).collect());
+    println!("Files in directories: {:#?}", files_in_dirs);
+
+    Ok(clone)
 }
 
 #[tauri::command]
@@ -26,6 +32,13 @@ pub fn save_folders(
     saved_folders: Vec<SavedFolder>,
     state: tauri::State<AppState>,
 ) -> Result<(), String> {
+    println!("Saving folders: {:?}", saved_folders);
+
+    *state
+        .saved_folders
+        .lock()
+        .map_err(|e| format!("Failed to lock saved folders: {}", e))? = saved_folders.clone();
+
     let saved_folders_str = serde_json::to_string(&saved_folders)
         .map_err(|e| format!("Failed to serialize saved folders: {}", e))?;
 

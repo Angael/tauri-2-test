@@ -1,5 +1,6 @@
 // Declare the todo module
 pub mod commands;
+pub mod files_in_dirs;
 pub mod saved_folders;
 pub mod todo;
 
