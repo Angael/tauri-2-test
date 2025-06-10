@@ -1,12 +1,12 @@
 // Declare the todo module
+pub mod app_state;
 pub mod commands;
 pub mod files_in_dirs;
 pub mod saved_folders;
 pub mod todo;
 
-use commands::{
-    add_todo, get_todos, greet, load_todos_from_disk, remove_todo, toggle_todo, AppState,
-};
+use crate::app_state::AppState;
+use commands::{add_todo, get_todos, greet, load_todos_from_disk, remove_todo, toggle_todo};
 use std::sync::Mutex;
 use tauri::Manager;
 

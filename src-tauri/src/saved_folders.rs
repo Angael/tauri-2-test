@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 
-use crate::{commands::AppState, files_in_dirs::model::FilesInDirs};
+use crate::{app_state::AppState, files_in_dirs::model::FilesInDirs};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SavedFolder {
