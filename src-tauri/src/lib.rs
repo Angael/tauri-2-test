@@ -2,15 +2,12 @@
 pub mod app_state;
 pub mod commands;
 pub mod files_in_dirs;
-pub mod saved_folders;
 pub mod todo;
 
 use crate::{app_state::AppState, files_in_dirs::model::FilesInDirs};
 use commands::{add_todo, get_todos, greet, load_todos_from_disk, remove_todo, toggle_todo};
 use std::sync::Mutex;
 use tauri::Manager;
-
-use crate::saved_folders::load_folders_from_disk;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -34,21 +31,19 @@ pub fn run() {
             let initial_todos = load_todos_from_disk(&data_file_path);
             let max_id = initial_todos.iter().map(|t| t.id).max().unwrap_or(0);
 
-            let saved_folders = Mutex::new(load_folders_from_disk(&saved_folders_path));
-
             // Create and manage the application state
             let app_state = AppState {
+                // Paths
                 data_file_path,
-                saved_folders_path,
                 files_in_dirs_path: files_in_dirs_path.clone(),
 
-                saved_folders,
+                // State
                 files_in_dirs: Mutex::new(
                     FilesInDirs::load_from_disk(files_in_dirs_path)
                         .expect("Failed to load files in directories"),
                 ),
-                todos: Mutex::new(initial_todos),
-                next_id: Mutex::new(max_id + 1),
+                todos: Mutex::new(initial_todos), // Deprecated
+                next_id: Mutex::new(max_id + 1),  // Deprecated
             };
             app.manage(app_state); // Make AppState available to commands
 
@@ -61,8 +56,6 @@ pub fn run() {
             add_todo,
             toggle_todo,
             remove_todo,
-            saved_folders::save_folders,
-            saved_folders::get_saved_folders,
             files_in_dirs::commands::get_files_in_dirs,
             files_in_dirs::commands::add_dir,
             files_in_dirs::commands::remove_dir,

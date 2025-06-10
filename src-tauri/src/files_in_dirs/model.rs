@@ -48,6 +48,7 @@ pub struct FilesInDirs {
 }
 
 impl FilesInDirs {
+    // Unused
     pub fn new(dirs: Vec<String>) -> Self {
         let mut files_in_dirs = FilesInDirs { dirs: Vec::new() };
 
@@ -76,6 +77,8 @@ impl FilesInDirs {
         }
     }
 
+    // TODO: Result unnecessary?
+    // TODO: Make disk write async, dont make ui wait for it
     pub fn save_to_disk(&self, path: std::path::PathBuf) -> Result<(), String> {
         let data = serde_json::to_string(self)
             .map_err(|e| format!("Failed to serialize FilesInDirs: {}", e))?;
