@@ -12,6 +12,34 @@ pub struct DirWithFiles {
     pub files: Vec<File>,
 }
 
+impl DirWithFiles {
+    pub fn new(dir: &String) -> Result<Self, String> {
+        let dir_clone = dir.clone();
+        let entries = std::fs::read_dir(dir)
+            .map_err(|e| format!("Failed to read directory '{}': {}", dir_clone, e))?;
+
+        let mut dir_with_files = DirWithFiles {
+            path: dir_clone,
+            files: Vec::new(),
+        };
+
+        for entry in entries {
+            let entry = entry.expect("Failed to read directory entry");
+            let path = entry.path();
+
+            if path.is_file() {
+                let metadata = path.metadata().unwrap();
+                dir_with_files.files.push(File {
+                    name: path.file_name().unwrap().to_string_lossy().into_owned(),
+                    size: metadata.len(),
+                });
+            }
+        }
+
+        Ok(dir_with_files)
+    }
+}
+
 // TODO: move loading files from FilesInDirs to DirWithFiles::new
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -24,31 +52,15 @@ impl FilesInDirs {
         let mut files_in_dirs = FilesInDirs { dirs: Vec::new() };
 
         for dir in dirs {
-            let dir_clone = dir.clone();
-            let entries = std::fs::read_dir(dir).unwrap_or_else(|_| {
-                eprintln!("Failed to read directory: {}", dir_clone);
-                std::fs::read_dir(".").unwrap() // Fallback to current directory
-            });
-
-            let mut dir_with_files = DirWithFiles {
-                path: dir_clone,
-                files: Vec::new(),
-            };
-
-            for entry in entries {
-                let entry = entry.unwrap();
-                let path = entry.path();
-
-                if path.is_file() {
-                    let metadata = path.metadata().unwrap();
-                    dir_with_files.files.push(File {
-                        name: path.file_name().unwrap().to_string_lossy().into_owned(),
-                        size: metadata.len(),
-                    });
+            match DirWithFiles::new(&dir) {
+                Ok(dir_with_files) => {
+                    files_in_dirs.dirs.push(dir_with_files);
                 }
-            }
-
-            files_in_dirs.dirs.push(dir_with_files);
+                Err(e) => {
+                    eprintln!("Error reading directory '{}': {}", dir, e);
+                    continue; // Skip this directory if it cannot be read
+                }
+            };
         }
 
         files_in_dirs
@@ -77,4 +89,18 @@ impl FilesInDirs {
     }
 
     // TODO: Add functions add_dir, rm_dir, rescan_dir, rescan_all
+    pub fn add_dir(&mut self, dir: String) -> Result<(), String> {
+        let dir_with_files = DirWithFiles::new(&dir)?;
+        self.dirs.push(dir_with_files);
+        Ok(())
+    }
+
+    pub fn remove_dir(&mut self, dir: &String) -> Result<(), String> {
+        if let Some(pos) = self.dirs.iter().position(|d| &d.path == dir) {
+            self.dirs.remove(pos);
+            Ok(())
+        } else {
+            Err(format!("Directory '{}' not found", dir))
+        }
+    }
 }
