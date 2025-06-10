@@ -8,6 +8,7 @@ pub struct File {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct DirWithFiles {
+    pub path: String,
     pub files: Vec<File>,
 }
 
@@ -27,7 +28,10 @@ impl FilesInDirs {
                 std::fs::read_dir(".").unwrap() // Fallback to current directory
             });
 
-            let mut dir_with_files = DirWithFiles { files: Vec::new() };
+            let mut dir_with_files = DirWithFiles {
+                path: dir_clone,
+                files: Vec::new(),
+            };
 
             for entry in entries {
                 let entry = entry.unwrap();
