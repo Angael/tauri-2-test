@@ -32,7 +32,7 @@ const Layout = ({ children }: Props) => {
         <MantineNavLink
           component={NavLink}
           to="/"
-          label="Todos"
+          label="Viewer"
           style={{ textDecoration: "none" }}
         />
         <MantineNavLink

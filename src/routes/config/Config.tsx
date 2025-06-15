@@ -54,6 +54,10 @@ const Config = () => {
     });
   };
 
+  const hasUnsavedChanges =
+    ffmpegPath !== configQuery.data?.ffmpeg_path ||
+    ffprobePath !== configQuery.data?.ffprobe_path;
+
   return (
     <Layout>
       <TextInput
@@ -71,7 +75,7 @@ const Config = () => {
       <Button
         onClick={handleSaveConfig}
         loading={configMutation.isPending}
-        disabled={configMutation.isPending}
+        disabled={configMutation.isPending || !hasUnsavedChanges}
       >
         Save Config
       </Button>

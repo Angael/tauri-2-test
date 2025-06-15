@@ -1,4 +1,4 @@
-import { Button, Group, Text } from "@mantine/core";
+import { Button, Group, Stack, Text } from "@mantine/core";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
 import Layout from "../../components/Layout";
@@ -53,22 +53,32 @@ const SavedDirs = () => {
         isPending={addFolderMut.isPending}
       />
       {dirsQuery.data?.dirs.map((dir, index) => (
-        <Group key={index}>
-          <Text style={{ userSelect: "text" }}>{dir.path}</Text>
-          <Text size="sm" c="gray" style={{ userSelect: "text" }}>
-            {dir.files.length} files
-          </Text>
-          <Button variant="outline" disabled={disableButtons} ml="auto">
-            Edit
-          </Button>
-          <Button
-            color="red"
-            variant="outline"
-            onClick={() => removeFolderMut.mutate(dir.path)}
-            disabled={disableButtons}
-          >
-            Delete
-          </Button>
+        <Group key={index} wrap="nowrap">
+          <Stack gap="0">
+            <Text
+              w="100%"
+              style={{ wordBreak: "break-word", userSelect: "text" }}
+            >
+              {dir.path}
+            </Text>
+            <Text size="sm" c="gray" style={{ userSelect: "text" }}>
+              {dir.files.length} files
+            </Text>
+          </Stack>
+
+          <Group wrap="nowrap" ml="auto" style={{ flexShrink: 0 }}>
+            <Button variant="outline" disabled={disableButtons}>
+              Sync
+            </Button>
+            <Button
+              color="red"
+              variant="outline"
+              onClick={() => removeFolderMut.mutate(dir.path)}
+              disabled={disableButtons}
+            >
+              Delete
+            </Button>
+          </Group>
         </Group>
       ))}
       {/* Output:

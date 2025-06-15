@@ -22,10 +22,11 @@ const AddSavedFolder = ({ onAddFolder, isPending }: Props) => {
     <form onSubmit={onSubmit}>
       <Group>
         <TextInput
-          placeholder="Folder name"
+          placeholder="Folder path"
           value={folderPath}
           disabled={isPending}
           onChange={(event) => setFolderPath(event.currentTarget.value)}
+          flex={1}
         />
         <Button type="submit" loading={isPending}>
           Add
