@@ -10,6 +10,10 @@ use crate::{app_state::AppState, config::AppConfig, files_in_dirs::model::FilesI
 use std::sync::Mutex;
 use tauri::Manager;
 
+// Import command functions to shorten generate_handler references
+use crate::config::config_cmd;
+use crate::files_in_dirs::files_in_dirs_cmd;
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -44,12 +48,11 @@ pub fn run() {
         })
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
-            // TODO: add "use" to shorten these, make sure commands files are named differently
-            files_in_dirs::files_in_dirs_cmd::get_files_in_dirs,
-            files_in_dirs::files_in_dirs_cmd::add_dir,
-            files_in_dirs::files_in_dirs_cmd::remove_dir,
-            config::config_cmd::get_config,
-            config::config_cmd::set_config,
+            files_in_dirs_cmd::get_files_in_dirs,
+            files_in_dirs_cmd::add_dir,
+            files_in_dirs_cmd::remove_dir,
+            config_cmd::get_config,
+            config_cmd::set_config,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
