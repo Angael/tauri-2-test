@@ -7,10 +7,6 @@ use crate::state_manager::JsonState;
 
 // Application state to hold todos and file path
 pub struct AppState {
-    // Paths
-    pub files_in_dirs_path: PathBuf,
-
-    // State
     pub app_config: JsonState<AppConfig>,
-    pub files_in_dirs: Mutex<FilesInDirs>,
+    pub files_in_dirs: JsonState<FilesInDirs>,
 }

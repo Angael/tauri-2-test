@@ -25,24 +25,14 @@ pub fn run() {
                 .path()
                 .app_data_dir()
                 .expect("Failed to get application data directory. Please ensure it's configured.");
-            let files_in_dirs_path = app_data_dir.join("files_in_dirs.json");
 
             // Print paths
             println!("app_data_dir: {}", app_data_dir.display());
 
-            // Create and manage the application state
-            let app_state = AppState {
-                // Paths
-                files_in_dirs_path: files_in_dirs_path.clone(),
-
-                // State
+            app.manage(AppState {
                 app_config: JsonState::load(app_data_dir.join("app_config.json")),
-                files_in_dirs: Mutex::new(
-                    FilesInDirs::load_from_disk(files_in_dirs_path)
-                        .expect("Failed to load files in directories"),
-                ),
-            };
-            app.manage(app_state); // Make AppState available to commands
+                files_in_dirs: JsonState::load(app_data_dir.join("files_in_dirs.json")),
+            }); // Make AppState available to commands
 
             Ok(())
         })
