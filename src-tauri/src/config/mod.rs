@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::save_load::SaveLoad;
 
-pub mod config_commands;
+pub mod config_cmd;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct AppConfig {
