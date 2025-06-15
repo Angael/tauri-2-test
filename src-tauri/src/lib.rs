@@ -41,6 +41,7 @@ pub fn run() {
             files_in_dirs_cmd::get_files_in_dirs,
             files_in_dirs_cmd::add_dir,
             files_in_dirs_cmd::remove_dir,
+            files_in_dirs_cmd::rescan_dir,
             config_cmd::get_config,
             config_cmd::set_config,
         ])
