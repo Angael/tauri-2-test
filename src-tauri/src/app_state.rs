@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 use std::sync::Mutex;
 
+use crate::config::AppConfig;
 use crate::files_in_dirs::model::FilesInDirs;
 use crate::todo::Todo;
 
@@ -11,6 +12,7 @@ pub struct AppState {
     pub files_in_dirs_path: PathBuf,
 
     // State
+    pub app_config: Mutex<AppConfig>,
     pub files_in_dirs: Mutex<FilesInDirs>,
     pub todos: Mutex<Vec<Todo>>, // Deprecated
     pub next_id: Mutex<u32>,     // Deprecated

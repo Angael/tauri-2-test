@@ -41,6 +41,12 @@ const Layout = ({ children }: Props) => {
           label="Saved Dirs"
           style={{ textDecoration: "none" }}
         />
+        <MantineNavLink
+          component={NavLink}
+          to="/config"
+          label="Config"
+          // style={{ textDecoration: "none" }}
+        />
       </AppShell.Navbar>
       <AppShell.Main>
         <Container>

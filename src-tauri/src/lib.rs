@@ -1,10 +1,14 @@
 // Declare the todo module
 pub mod app_state;
 pub mod commands;
+pub mod config;
 pub mod files_in_dirs;
+pub mod save_load;
 pub mod todo;
 
-use crate::{app_state::AppState, files_in_dirs::model::FilesInDirs};
+use crate::save_load::SaveLoad;
+
+use crate::{app_state::AppState, config::AppConfig, files_in_dirs::model::FilesInDirs};
 use commands::{add_todo, get_todos, greet, load_todos_from_disk, remove_todo, toggle_todo};
 use std::sync::Mutex;
 use tauri::Manager;
@@ -21,11 +25,10 @@ pub fn run() {
                 .app_data_dir()
                 .expect("Failed to get application data directory. Please ensure it's configured.");
             let data_file_path = app_data_dir.join("todos.json");
-            let saved_folders_path = app_data_dir.join("saved_folders.json");
             let files_in_dirs_path = app_data_dir.join("files_in_dirs.json");
 
             // Print paths
-            println!("Data file path: {}", data_file_path.display());
+            println!("app_data_dir: {}", app_data_dir.display());
 
             // Load initial todos and determine the next ID
             let initial_todos = load_todos_from_disk(&data_file_path);
@@ -38,6 +41,7 @@ pub fn run() {
                 files_in_dirs_path: files_in_dirs_path.clone(),
 
                 // State
+                app_config: AppConfig::load_from_disk(),
                 files_in_dirs: Mutex::new(
                     FilesInDirs::load_from_disk(files_in_dirs_path)
                         .expect("Failed to load files in directories"),
@@ -56,9 +60,12 @@ pub fn run() {
             add_todo,
             toggle_todo,
             remove_todo,
+            // TODO: add "use" to shorten these, make sure commands files are named differently
             files_in_dirs::commands::get_files_in_dirs,
             files_in_dirs::commands::add_dir,
             files_in_dirs::commands::remove_dir,
+            config::config_commands::get_config,
+            config::config_commands::set_config,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
