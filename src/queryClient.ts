@@ -31,6 +31,8 @@ export const queryClient = new QueryClient({
         const { title, message } = mutation.meta.error;
 
         showErrorNotification(title, message);
+      } else if (typeof error === "string") {
+        showErrorNotification("Error", error);
       }
     },
     onSettled: (data, error, variables, context, mutation) => {
