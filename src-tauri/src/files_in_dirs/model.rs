@@ -69,6 +69,10 @@ impl FilesInDirs {
 
     // TODO: Add functions add_dir, rm_dir, rescan_dir, rescan_all
     pub fn add_dir(&mut self, dir: String) -> Result<(), String> {
+        if self.dirs.iter().any(|d| d.path == dir) {
+            return Err(format!("Directory '{}' already exists", dir));
+        }
+
         let dir_with_files = DirWithFiles::new(&dir)?;
         self.dirs.push(dir_with_files);
         Ok(())
@@ -77,6 +81,15 @@ impl FilesInDirs {
     pub fn remove_dir(&mut self, dir: &String) -> Result<(), String> {
         if let Some(pos) = self.dirs.iter().position(|d| &d.path == dir) {
             self.dirs.remove(pos);
+            Ok(())
+        } else {
+            Err(format!("Directory '{}' not found", dir))
+        }
+    }
+
+    pub fn rescan_dir(&mut self, dir: &String) -> Result<(), String> {
+        if let Some(dir_with_files) = self.dirs.iter_mut().find(|d| &d.path == dir) {
+            *dir_with_files = DirWithFiles::new(dir)?;
             Ok(())
         } else {
             Err(format!("Directory '{}' not found", dir))

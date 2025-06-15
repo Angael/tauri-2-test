@@ -43,8 +43,20 @@ const SavedDirs = () => {
     }
   });
 
+  const rescanDir = useMutation({
+    mutationKey: ["rescan_dir"],
+    mutationFn: async (path: string) =>
+      await invoke("rescan_dir", { dir: path }),
+    onSuccess: () => {
+      dirsQuery.refetch();
+    }
+  });
+
   const disableButtons =
-    dirsQuery.isPending || addFolderMut.isPending || removeFolderMut.isPending;
+    dirsQuery.isPending ||
+    addFolderMut.isPending ||
+    removeFolderMut.isPending ||
+    rescanDir.isPending;
 
   return (
     <Layout>
@@ -67,7 +79,11 @@ const SavedDirs = () => {
           </Stack>
 
           <Group wrap="nowrap" ml="auto" style={{ flexShrink: 0 }}>
-            <Button variant="outline" disabled={disableButtons}>
+            <Button
+              variant="outline"
+              onClick={() => rescanDir.mutate(dir.path)}
+              disabled={disableButtons}
+            >
               Sync
             </Button>
             <Button

@@ -1,14 +1,13 @@
 // Import styles of packages that you've installed.
 // All packages except `@mantine/hooks` require styles imports
-import "./App.css";
 import "@mantine/core/styles.css";
+import "./App.css";
 
 import { MantineProvider } from "@mantine/core";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { router } from "./routes/router";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider } from "react-router";
-
-const queryClient = new QueryClient();
+import { queryClient } from "./queryClient";
+import { router } from "./routes/router";
 
 function App() {
   return (

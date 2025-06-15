@@ -27,6 +27,16 @@ pub fn remove_dir(dir: String, state: tauri::State<AppState>) -> Result<(), Stri
     let result = state
         .files_in_dirs
         .with_mut(|files_in_dirs| files_in_dirs.remove_dir(&dir))?;
+    result
+}
+
+#[tauri::command]
+pub fn rescan_dir(dir: String, state: tauri::State<AppState>) -> Result<(), String> {
+    println!("rescan_dir: {:?}", dir);
+
+    let result = state
+        .files_in_dirs
+        .with_mut(|files_in_dirs| files_in_dirs.rescan_dir(&dir))?;
 
     result
 }
