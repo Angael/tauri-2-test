@@ -32,10 +32,10 @@ where
             T::default()
         };
 
-        return Self {
+        Self {
             path,
             state: Arc::new(RwLock::new(state)),
-        };
+        }
     }
 
     /// Saves the current state to its JSON file.

@@ -6,8 +6,7 @@ pub mod files_in_dirs;
 pub mod state_manager;
 
 use crate::state_manager::JsonState;
-use crate::{app_state::AppState, files_in_dirs::model::FilesInDirs};
-use std::sync::Mutex;
+use crate::app_state::AppState;
 use tauri::Manager;
 
 // Import command functions to shorten generate_handler references

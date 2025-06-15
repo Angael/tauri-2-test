@@ -1,5 +1,3 @@
-use std::path::PathBuf;
-use std::sync::Mutex;
 
 use crate::config::AppConfig;
 use crate::files_in_dirs::model::FilesInDirs;

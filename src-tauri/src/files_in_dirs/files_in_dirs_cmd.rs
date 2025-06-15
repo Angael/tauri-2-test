@@ -13,30 +13,30 @@ pub fn get_files_in_dirs(state: tauri::State<AppState>) -> FilesInDirs {
 pub fn add_dir(dir: String, state: tauri::State<AppState>) -> Result<(), String> {
     println!("add_dir: {:?}", dir);
 
-    let result = state
-        .files_in_dirs
-        .with_mut(|files_in_dirs| files_in_dirs.add_dir(dir))?;
+    
 
-    result
+    state
+        .files_in_dirs
+        .with_mut(|files_in_dirs| files_in_dirs.add_dir(dir))?
 }
 
 #[tauri::command]
 pub fn remove_dir(dir: String, state: tauri::State<AppState>) -> Result<(), String> {
     println!("remove_dir: {:?}", dir);
 
-    let result = state
+    
+    state
         .files_in_dirs
-        .with_mut(|files_in_dirs| files_in_dirs.remove_dir(&dir))?;
-    result
+        .with_mut(|files_in_dirs| files_in_dirs.remove_dir(&dir))?
 }
 
 #[tauri::command]
 pub fn rescan_dir(dir: String, state: tauri::State<AppState>) -> Result<(), String> {
     println!("rescan_dir: {:?}", dir);
 
-    let result = state
-        .files_in_dirs
-        .with_mut(|files_in_dirs| files_in_dirs.rescan_dir(&dir))?;
+    
 
-    result
+    state
+        .files_in_dirs
+        .with_mut(|files_in_dirs| files_in_dirs.rescan_dir(&dir))?
 }
