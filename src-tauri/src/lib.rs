@@ -1,12 +1,12 @@
 // Declare the todo module
+// TODO: is pub necessary here?
 pub mod app_state;
 pub mod config;
 pub mod files_in_dirs;
-pub mod save_load;
+pub mod state_manager;
 
-use crate::save_load::SaveLoad;
-
-use crate::{app_state::AppState, config::AppConfig, files_in_dirs::model::FilesInDirs};
+use crate::state_manager::JsonState;
+use crate::{app_state::AppState, files_in_dirs::model::FilesInDirs};
 use std::sync::Mutex;
 use tauri::Manager;
 
@@ -36,7 +36,7 @@ pub fn run() {
                 files_in_dirs_path: files_in_dirs_path.clone(),
 
                 // State
-                app_config: AppConfig::load_from_disk(),
+                app_config: JsonState::load(app_data_dir.join("app_config.json")),
                 files_in_dirs: Mutex::new(
                     FilesInDirs::load_from_disk(files_in_dirs_path)
                         .expect("Failed to load files in directories"),

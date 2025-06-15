@@ -1,17 +1,10 @@
-use crate::save_load::SaveLoad;
 use crate::{app_state::AppState, config::AppConfig};
 
 // remember to call `.manage(MyState::default())`
 #[tauri::command]
 pub fn get_config(state: tauri::State<AppState>) -> Result<AppConfig, String> {
     println!("get_config");
-
-    let config = state
-        .app_config
-        .lock()
-        .map_err(|e| format!("Failed to lock app config: {}", e))?;
-
-    Ok(config.clone())
+    Ok(state.app_config.with(|config| config.clone()))
 }
 
 #[tauri::command]
@@ -22,14 +15,8 @@ pub fn set_config(
 ) -> Result<(), String> {
     println!("set_config");
 
-    let mut config = state
-        .app_config
-        .lock()
-        .map_err(|e| format!("Failed to lock app config: {}", e))?;
-
-    config.ffmpeg_path = ffmpeg_path;
-    config.ffprobe_path = ffprobe_path;
-    config.save_to_disk()?;
-
-    Ok(())
+    state.app_config.with_mut(|config| {
+        config.ffmpeg_path = ffmpeg_path;
+        config.ffprobe_path = ffprobe_path;
+    })
 }
