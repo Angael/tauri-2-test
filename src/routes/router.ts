@@ -1,16 +1,17 @@
 import { createBrowserRouter } from "react-router";
-import Todos from "./todos/Todos";
 import SavedDirs from "./saved-folders/SavedFolders";
 import Config from "./config/Config";
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    Component: Todos
+    Component: SavedDirs,
+    index: true
   },
   {
     path: "/saved-dirs",
-    Component: SavedDirs
+    Component: SavedDirs,
+    index: true
   },
   {
     path: "/config",
