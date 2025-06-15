@@ -1,37 +1,77 @@
 import { Button, TextInput } from "@mantine/core";
-import Layout from "../../components/Layout";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
+import { useEffect, useState } from "react";
+import Layout from "../../components/Layout";
 
-type Props = {};
+interface ConfigData {
+  ffmpeg_path: string;
+  ffprobe_path: string;
+}
 
-const Config = (props: Props) => {
+const Config = () => {
   const configQuery = useQuery({
     queryKey: ["get_config"],
     queryFn: async () => {
-      return invoke("get_config");
+      return invoke<ConfigData>("get_config");
     }
   });
 
+  const configMutation = useMutation({
+    mutationFn: async (config: { ffmpegPath: string; ffprobePath: string }) => {
+      return invoke("set_config", {
+        ffmpegPath: config.ffmpegPath,
+        ffprobePath: config.ffprobePath
+      });
+    },
+    onSuccess: () => {
+      configQuery.refetch();
+    }
+  });
+
+  const [ffmpegPath, setFfmpegPath] = useState("");
+  const [ffprobePath, setFfprobePath] = useState("");
+
+  useEffect(() => {
+    if (configQuery.data) {
+      setFfmpegPath(configQuery.data.ffmpeg_path || "");
+      setFfprobePath(configQuery.data.ffprobe_path || "");
+    }
+  }, [configQuery.data]);
+
+  const handleFfmpegPathChange = (value: string) => {
+    setFfmpegPath(value);
+  };
+
+  const handleFfprobePathChange = (value: string) => {
+    setFfprobePath(value);
+  };
+
+  const handleSaveConfig = () => {
+    configMutation.mutate({
+      ffmpegPath,
+      ffprobePath
+    });
+  };
+
   return (
     <Layout>
-      <pre>{JSON.stringify(configQuery, null, 2)}</pre>
       <TextInput
         label="Path to ffmpeg"
         placeholder="I:\FFmpeg\bin\ffmpeg.exe"
+        value={ffmpegPath}
+        onChange={(event) => handleFfmpegPathChange(event.currentTarget.value)}
       />
       <TextInput
         label="Path to ffprobe"
         placeholder="I:\FFmpeg\bin\ffprobe.exe"
+        value={ffprobePath}
+        onChange={(event) => handleFfprobePathChange(event.currentTarget.value)}
       />
       <Button
-        onClick={async () => {
-          await invoke("set_config", {
-            ffmpegPath: "I:\\FFmpeg\\bin\\ffmpeg.exe",
-            ffprobePath: "I:\\FFmpeg\\bin\\ffprobe.exe"
-          });
-          configQuery.refetch();
-        }}
+        onClick={handleSaveConfig}
+        loading={configMutation.isPending}
+        disabled={configMutation.isPending}
       >
         Save Config
       </Button>
