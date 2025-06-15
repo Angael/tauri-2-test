@@ -24,7 +24,10 @@ where
             fs::read_to_string(&path)
                 .ok()
                 .and_then(|content| serde_json::from_str(&content).ok())
-                .unwrap_or_default()
+                .unwrap_or_else(|| {
+                    eprintln!("Failed to read or parse JSON file at: {}", path.display());
+                    T::default()
+                })
         } else {
             T::default()
         };
