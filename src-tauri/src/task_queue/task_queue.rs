@@ -76,7 +76,7 @@ pub fn start_event_consumer(queue: ThreadSafeEventQueue, app_handle: AppHandle) 
             println!("Consumer processing event: {:?}", event);
 
             // Sleep for 500ms
-            thread::sleep(std::time::Duration::from_millis(500));
+            thread::sleep(std::time::Duration::from_millis(200));
 
             println!(
                 "Consumer finished processing event, events left: {:?}",

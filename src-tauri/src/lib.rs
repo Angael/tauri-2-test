@@ -42,11 +42,22 @@ pub fn run() {
 
             let event_queue = ThreadSafeEventQueue::new();
 
-            // This clones the Arc, allowing shared ownership.
-            let queue_for_consumer = event_queue.clone();
+            
 
-            // Start the event consumer thread
-            start_event_consumer(queue_for_consumer, app_handle);
+            // Single consumer approach
+            // This clones the Arc, allowing shared ownership.
+            // let queue_for_consumer = event_queue.clone();
+            // start_event_consumer(queue_for_consumer, app_handle);
+
+            // Start multiple consumers for load balancing
+            for _ in 0..3 {
+                let queue_for_consumer = event_queue.clone();
+                let app_handle_clone = app_handle.clone();
+                std::thread::spawn(move || {
+                    start_event_consumer(queue_for_consumer, app_handle_clone);
+                });
+            }
+            
 
             app.manage(AppState {
                 event_queue,
