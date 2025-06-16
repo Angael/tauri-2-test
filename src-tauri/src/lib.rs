@@ -4,6 +4,7 @@ pub mod app_state;
 pub mod config;
 pub mod files_in_dirs;
 pub mod state_manager;
+pub mod thumb_gen;
 
 use crate::app_state::AppState;
 use crate::state_manager::JsonState;
@@ -43,6 +44,7 @@ pub fn run() {
             files_in_dirs_cmd::rescan_dir,
             config_cmd::get_config,
             config_cmd::set_config,
+            thumb_gen::generate_thumbnails
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
