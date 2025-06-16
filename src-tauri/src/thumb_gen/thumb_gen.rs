@@ -9,7 +9,7 @@
 
 use ffmpeg_sidecar::command::FfmpegCommand;
 
-pub fn do_ffmpeg_stuff(file_absolute_path: String) {
+pub fn gen_ffmpeg_vid_tiled_thumb(file_absolute_path: String) {
     println!("do_ffmpeg_stuff: {:?}", file_absolute_path);
 
     let input = file_absolute_path.clone();

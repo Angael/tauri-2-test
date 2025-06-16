@@ -4,10 +4,12 @@ pub mod app_state;
 pub mod config;
 pub mod files_in_dirs;
 pub mod state_manager;
+pub mod task_queue;
 pub mod thumb_gen;
 
 use crate::app_state::AppState;
 use crate::state_manager::JsonState;
+use crate::task_queue::task_queue::{start_event_consumer, ThreadSafeEventQueue};
 use ffmpeg_sidecar::command::ffmpeg_is_installed;
 use tauri::Manager;
 
@@ -33,11 +35,21 @@ pub fn run() {
 
             if ffmpeg_is_installed() {
                 println!("FFmpeg is already installed! 🎉");
-                println!("For demo purposes, we'll re-download and unpack it anyway.");
                 println!("TIP: Use `auto_download()` to skip manual customization.");
+            } else {
+                todo!("FFmpeg is not installed. Please install it manually or use `auto_download()` to download it automatically.");
             }
 
+            let event_queue = ThreadSafeEventQueue::new();
+
+            // This clones the Arc, allowing shared ownership.
+            let queue_for_consumer = event_queue.clone();
+
+            // Start the event consumer thread
+            start_event_consumer(queue_for_consumer, app_handle);
+
             app.manage(AppState {
+                event_queue,
                 app_config: JsonState::load(app_data_dir.join("app_config.json")),
                 files_in_dirs: JsonState::load(app_data_dir.join("files_in_dirs.json")),
             }); // Make AppState available to commands

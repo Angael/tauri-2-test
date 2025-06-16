@@ -21,7 +21,7 @@ declare module "@tanstack/react-query" {
 
 export const queryClient = new QueryClient({
   mutationCache: new MutationCache({
-    onError: (error, variables, context, mutation) => {
+    onError: (error, _variables, _context, mutation) => {
       if (error?.status === 401) {
         // perform logout
         window.location.href = "/signin"; // or navigate with router
@@ -35,7 +35,7 @@ export const queryClient = new QueryClient({
         showErrorNotification("Error", error);
       }
     },
-    onSettled: (data, error, variables, context, mutation) => {
+    onSettled: (_data, _error, _variables, _context, mutation) => {
       if (mutation.meta?.invalidateQueryKey) {
         queryClient.invalidateQueries({
           queryKey: mutation.meta.invalidateQueryKey

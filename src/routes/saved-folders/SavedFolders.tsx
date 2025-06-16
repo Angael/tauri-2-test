@@ -1,4 +1,3 @@
-import { Button, Group, Stack, Text } from "@mantine/core";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
 import Layout from "../../components/Layout";
