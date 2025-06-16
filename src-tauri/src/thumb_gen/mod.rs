@@ -7,7 +7,7 @@ pub fn generate_thumbnails(state: tauri::State<AppState>, dir: String) -> Result
         .files_in_dirs
         .with(|files_in_dirs| files_in_dirs.dirs.iter().find(|d| d.path == dir).cloned());
 
-    if let None = files {
+    if files.is_none() {
         return Err(format!("Directory '{}' not found in files_in_dirs", dir));
     }
 
