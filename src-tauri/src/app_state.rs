@@ -1,4 +1,3 @@
-
 use crate::config::AppConfig;
 use crate::files_in_dirs::model::FilesInDirs;
 use crate::state_manager::JsonState;
