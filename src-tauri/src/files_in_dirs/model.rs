@@ -2,8 +2,8 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct File {
-    name: String,
-    size: u64,
+    pub name: String,
+    pub size: u64,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
