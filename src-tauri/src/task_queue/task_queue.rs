@@ -4,13 +4,8 @@ use std::thread;
 use tauri::AppHandle;
 use tauri::Emitter;
 
-// Define different event types (must be Send + Sync + 'static)
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
-pub enum Event {
-    Log { message: String },
-    UserAction { user_id: u32, action: String },
-    SystemAlert { code: u16, description: String },
-}
+use crate::task_queue::task::Task;
+use crate::task_queue::task_handlers::handle_task_generate_thumb;
 
 // A thread-safe, blocking event queue.
 // It uses a Condvar to allow the consumer thread to sleep
@@ -20,7 +15,7 @@ pub struct ThreadSafeEventQueue {
     // The Arc allows multiple owners (main thread, consumer thread).
     // The Mutex protects the VecDeque.
     // The Condvar signals when the queue is no longer empty.
-    inner: Arc<(Mutex<VecDeque<Event>>, Condvar)>,
+    inner: Arc<(Mutex<VecDeque<Task>>, Condvar)>,
 }
 
 impl ThreadSafeEventQueue {
@@ -31,7 +26,7 @@ impl ThreadSafeEventQueue {
     }
 
     // Adds an event and notifies one waiting thread.
-    pub fn enqueue(&self, event: Event) {
+    pub fn enqueue(&self, event: Task) {
         let (lock, cvar) = &*self.inner;
         let mut queue = lock.lock().unwrap();
         queue.push_back(event);
@@ -41,7 +36,7 @@ impl ThreadSafeEventQueue {
 
     // Waits for an event to be available and returns it.
     // This method will block the calling thread until an event is enqueued.
-    pub fn dequeue(&self) -> Event {
+    pub fn dequeue(&self) -> Task {
         let (lock, cvar) = &*self.inner;
         let mut queue = lock.lock().unwrap();
 
@@ -72,19 +67,22 @@ pub fn start_event_consumer(queue: ThreadSafeEventQueue, app_handle: AppHandle) 
             // The call to `dequeue` will block here until an event is
             // available, consuming no CPU while waiting.
             let event = queue.dequeue();
+            // println!("Consumer processing event: {:?}", event);
 
-            println!("Consumer processing event: {:?}", event);
+            match event {
+                Task::GenerateThumb(task) => {
+                    handle_task_generate_thumb(task, app_handle.clone());
+                }
+                _ => {
+                    // Handle other task types here.
+                    println!("Unhandled task: {:?}", event);
+                }
+            }
 
-            // Sleep for 500ms
-            thread::sleep(std::time::Duration::from_millis(200));
-
-            println!(
-                "Consumer finished processing event, events left: {:?}",
-                queue.len()
-            );
-
-            // Example: Emit the processed event to the frontend
-            app_handle.emit("rust-event-processed", event).unwrap();
+            // println!(
+            //     "Consumer finished processing event, events left: {:?}",
+            //     queue.len()
+            // );
         }
     });
 }

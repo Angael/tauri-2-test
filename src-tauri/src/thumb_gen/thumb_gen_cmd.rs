@@ -1,7 +1,8 @@
 use std::path::Path;
 
 use crate::{
-    app_state::AppState, task_queue::task_queue::Event,
+    app_state::AppState,
+    task_queue::task::{GenerateThumbTask, Task},
     thumb_gen::thumb_gen::gen_ffmpeg_vid_tiled_thumb,
 };
 
@@ -23,9 +24,12 @@ pub fn generate_thumbnails(state: tauri::State<AppState>, dir: String) -> Result
     for file in files.iter() {
         println!("Processing file: {}", file.name);
 
-        state.event_queue.enqueue(Event::Log {
-            message: format!("Generating thumbnail for file: {}", file.name),
-        });
+        state
+            .event_queue
+            .enqueue(Task::GenerateThumb(GenerateThumbTask {
+                dir: dir.clone(),
+                file: file.name.clone(),
+            }));
         // let file_path = dir_path.join(&file.name);
         // println!("Generating thumbnail for file: {}", file_path.display());
         // let output = gen_ffmpeg_vid_tiled_thumb(file_path.to_str().unwrap().to_string());
