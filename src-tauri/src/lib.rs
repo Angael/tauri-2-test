@@ -8,11 +8,13 @@ pub mod thumb_gen;
 
 use crate::app_state::AppState;
 use crate::state_manager::JsonState;
+use ffmpeg_sidecar::command::ffmpeg_is_installed;
 use tauri::Manager;
 
 // Import command functions to shorten generate_handler references
 use crate::config::config_cmd;
 use crate::files_in_dirs::files_in_dirs_cmd;
+use crate::thumb_gen::thumb_gen_cmd;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -29,6 +31,12 @@ pub fn run() {
             // Print paths
             println!("app_data_dir: {}", app_data_dir.display());
 
+            if ffmpeg_is_installed() {
+                println!("FFmpeg is already installed! 🎉");
+                println!("For demo purposes, we'll re-download and unpack it anyway.");
+                println!("TIP: Use `auto_download()` to skip manual customization.");
+            }
+
             app.manage(AppState {
                 app_config: JsonState::load(app_data_dir.join("app_config.json")),
                 files_in_dirs: JsonState::load(app_data_dir.join("files_in_dirs.json")),
@@ -44,7 +52,7 @@ pub fn run() {
             files_in_dirs_cmd::rescan_dir,
             config_cmd::get_config,
             config_cmd::set_config,
-            thumb_gen::generate_thumbnails
+            thumb_gen_cmd::generate_thumbnails
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
