@@ -4,6 +4,9 @@ use serde::{Deserialize, Serialize};
 pub struct File {
     pub name: String,
     pub size: u64,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub video_stats: Option<String>, // Placeholder for video analysis data
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -32,6 +35,7 @@ impl DirWithFiles {
                 dir_with_files.files.push(File {
                     name: path.file_name().unwrap().to_string_lossy().into_owned(),
                     size: metadata.len(),
+                    video_stats: None,
                 });
             }
         }
