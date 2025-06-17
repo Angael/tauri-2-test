@@ -2,7 +2,6 @@ use std::collections::VecDeque;
 use std::sync::{Arc, Condvar, Mutex};
 use std::thread;
 use tauri::AppHandle;
-use tauri::Emitter;
 
 use crate::task_queue::task::Task;
 use crate::task_queue::task_handlers::handle_task_generate_thumb;
