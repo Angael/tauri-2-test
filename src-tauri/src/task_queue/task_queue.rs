@@ -68,10 +68,10 @@ pub fn start_event_consumer(queue: ThreadSafeEventQueue, app_handle: AppHandle) 
 
             match event {
                 Task::GenerateThumb(task) => {
-                    handle_task_generate_thumb(task, app_handle.clone());
+                    handle_task_generate_thumb(task, &app_handle);
                 }
                 Task::AnalyzeVideo(task) => {
-                    handle_task_analyze_video(task, app_handle.clone());
+                    handle_task_analyze_video(task, &app_handle);
                 }
                 _ => {
                     // Handle other task types here.

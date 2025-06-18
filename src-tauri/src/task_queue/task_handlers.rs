@@ -4,12 +4,13 @@ use tauri::{Emitter, Manager};
 
 use crate::{
     app_state::AppState,
+    files_in_dirs::file::VideoStats,
     task_queue::task::{AnalyzeVideoTask, GenerateThumbTask},
 };
 
 const VIDEO_EXTENSIONS: [&str; 6] = [".mp4", ".mkv", ".avi", ".mov", ".flv", ".wmv"];
 
-pub fn handle_task_analyze_video(task: AnalyzeVideoTask, app_handle: tauri::AppHandle) {
+pub fn handle_task_analyze_video(task: AnalyzeVideoTask, app_handle: &tauri::AppHandle) {
     let is_analyzed: bool = app_handle.state::<AppState>().files_in_dirs.with(|s| {
         for dir in s.dirs.iter() {
             if dir.path == task.dir {
@@ -32,17 +33,64 @@ pub fn handle_task_analyze_video(task: AnalyzeVideoTask, app_handle: tauri::AppH
 
     let path: PathBuf = Path::new(&task.dir).join(&task.file);
 
-    match ffprobe(path) {
-        Ok(info) => {
-            println!("Pretty ffprobe info: {:#?}", info);
-        }
+    let info = match ffprobe(path) {
+        Ok(info) => info,
         Err(e) => {
             eprintln!("Failed to analyze video '{}': {}", task.file, e);
+            return;
         }
-    }
+    };
+
+    let v_stream = match info
+        .streams
+        .iter()
+        .find(|s| s.codec_type == Some("video".to_string()))
+    {
+        Some(stream) => stream,
+        None => {
+            eprintln!("No video stream found in '{}'", task.file);
+            return;
+        }
+    };
+
+    let video_stats = VideoStats {
+        dur: v_stream
+            .duration
+            .as_ref()
+            .and_then(|d| d.parse::<f64>().ok())
+            .unwrap_or(0.0),
+        res: (
+            v_stream.width.unwrap_or(0) as u16,
+            v_stream.height.unwrap_or(0) as u16,
+        ),
+        br: v_stream
+            .bit_rate
+            .as_ref()
+            .and_then(|bit_rate| bit_rate.parse::<u32>().ok())
+            .unwrap_or(0),
+    };
+
+    // Save the analysis result to the app state
+    let _ = app_handle.state::<AppState>().files_in_dirs.with_mut(|s| {
+        let target_file = s
+            .dirs
+            .iter_mut()
+            .find(|dir| dir.path == task.dir)
+            .and_then(|dir| dir.files.iter_mut().find(|f| f.name == task.file));
+
+        if let Some(file) = target_file {
+            file.video_stats = Some(video_stats.clone());
+            println!(
+                "Video stats for '{}' in directory '{}' updated: {:?}",
+                task.file, task.dir, video_stats
+            );
+        } else {
+            eprintln!("File '{}' not found in directory '{}'", task.file, task.dir);
+        }
+    });
 }
 
-pub fn handle_task_generate_thumb(task: GenerateThumbTask, app_handle: tauri::AppHandle) {
+pub fn handle_task_generate_thumb(task: GenerateThumbTask, app_handle: &tauri::AppHandle) {
     // println!("Handling GenerateThumb task for file: {}", task.file);
 
     let is_video: bool = VIDEO_EXTENSIONS
