@@ -1,11 +1,49 @@
+use ffprobe::ffprobe;
+use std::path::{Path, PathBuf};
 use tauri::{Emitter, Manager};
 
-use crate::{app_state::AppState, files_in_dirs, task_queue::task::GenerateThumbTask};
+use crate::{
+    app_state::AppState,
+    task_queue::task::{AnalyzeVideoTask, GenerateThumbTask},
+};
 
 const VIDEO_EXTENSIONS: [&str; 6] = [".mp4", ".mkv", ".avi", ".mov", ".flv", ".wmv"];
 
+pub fn handle_task_analyze_video(task: AnalyzeVideoTask, app_handle: tauri::AppHandle) {
+    let is_analyzed: bool = app_handle.state::<AppState>().files_in_dirs.with(|s| {
+        for dir in s.dirs.iter() {
+            if dir.path == task.dir {
+                if let Some(file) = dir.files.iter().find(|f| f.name == task.file) {
+                    // Check if the file has already been analyzed
+                    return file.video_stats.is_some();
+                }
+            }
+        }
+        false
+    });
+
+    if is_analyzed {
+        println!(
+            "Video '{}' in directory '{}' has already been analyzed.",
+            task.file, task.dir
+        );
+        return;
+    }
+
+    let path: PathBuf = Path::new(&task.dir).join(&task.file);
+
+    match ffprobe(path) {
+        Ok(info) => {
+            println!("Pretty ffprobe info: {:#?}", info);
+        }
+        Err(e) => {
+            eprintln!("Failed to analyze video '{}': {}", task.file, e);
+        }
+    }
+}
+
 pub fn handle_task_generate_thumb(task: GenerateThumbTask, app_handle: tauri::AppHandle) {
-    println!("Handling GenerateThumb task for file: {}", task.file);
+    // println!("Handling GenerateThumb task for file: {}", task.file);
 
     let is_video: bool = VIDEO_EXTENSIONS
         .iter()
@@ -16,7 +54,7 @@ pub fn handle_task_generate_thumb(task: GenerateThumbTask, app_handle: tauri::Ap
         return;
     }
 
-    let file_in_state = app_handle.state::<AppState>().files_in_dirs.with(|s| {
+    let _file_in_state = app_handle.state::<AppState>().files_in_dirs.with(|s| {
         for dir in s.dirs.iter() {
             if dir.path == task.dir {
                 if let Some(file) = dir.files.iter().find(|f| f.name == task.file) {

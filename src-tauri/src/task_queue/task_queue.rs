@@ -7,8 +7,6 @@ use crate::task_queue::task::Task;
 use crate::task_queue::task_handlers::handle_task_generate_thumb;
 
 // A thread-safe, blocking event queue.
-// It uses a Condvar to allow the consumer thread to sleep
-// until an event is available.
 #[derive(Clone)]
 pub struct ThreadSafeEventQueue {
     // The Arc allows multiple owners (main thread, consumer thread).

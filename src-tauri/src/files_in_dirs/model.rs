@@ -1,13 +1,9 @@
+use crate::{
+    app_state::AppState,
+    files_in_dirs::file::File,
+    task_queue::task::{AnalyzeVideoTask, Task},
+};
 use serde::{Deserialize, Serialize};
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct File {
-    pub name: String,
-    pub size: u64,
-
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub video_stats: Option<String>, // Placeholder for video analysis data
-}
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct DirWithFiles {
@@ -16,13 +12,13 @@ pub struct DirWithFiles {
 }
 
 impl DirWithFiles {
-    pub fn new(dir: &String) -> Result<Self, String> {
+    pub fn new(dir: &String, state: tauri::State<AppState>) -> Result<Self, String> {
         let dir_clone = dir.clone();
         let entries = std::fs::read_dir(dir)
             .map_err(|e| format!("Failed to read directory '{}': {}", dir_clone, e))?;
 
         let mut dir_with_files = DirWithFiles {
-            path: dir_clone,
+            path: dir_clone.clone(),
             files: Vec::new(),
         };
 
@@ -32,11 +28,21 @@ impl DirWithFiles {
 
             if path.is_file() {
                 let metadata = path.metadata().unwrap();
-                dir_with_files.files.push(File {
+
+                let file = File {
                     name: path.file_name().unwrap().to_string_lossy().into_owned(),
                     size: metadata.len(),
                     video_stats: None,
-                });
+                };
+
+                dir_with_files.files.push(file.clone());
+
+                state
+                    .event_queue
+                    .enqueue(Task::AnalyzeVideo(AnalyzeVideoTask {
+                        dir: dir_clone.clone(),
+                        file: file.name.clone(),
+                    }));
             }
         }
 
@@ -52,32 +58,13 @@ pub struct FilesInDirs {
 }
 
 impl FilesInDirs {
-    // Unused
-    pub fn new(dirs: Vec<String>) -> Self {
-        let mut files_in_dirs = FilesInDirs { dirs: Vec::new() };
-
-        for dir in dirs {
-            match DirWithFiles::new(&dir) {
-                Ok(dir_with_files) => {
-                    files_in_dirs.dirs.push(dir_with_files);
-                }
-                Err(e) => {
-                    eprintln!("Error reading directory '{}': {}", dir, e);
-                    continue; // Skip this directory if it cannot be read
-                }
-            };
-        }
-
-        files_in_dirs
-    }
-
     // TODO: Add functions add_dir, rm_dir, rescan_dir, rescan_all
-    pub fn add_dir(&mut self, dir: String) -> Result<(), String> {
+    pub fn add_dir(&mut self, dir: String, state: tauri::State<AppState>) -> Result<(), String> {
         if self.dirs.iter().any(|d| d.path == dir) {
             return Err(format!("Directory '{}' already exists", dir));
         }
 
-        let dir_with_files = DirWithFiles::new(&dir)?;
+        let dir_with_files = DirWithFiles::new(&dir, state)?;
         self.dirs.push(dir_with_files);
         Ok(())
     }
@@ -91,9 +78,14 @@ impl FilesInDirs {
         }
     }
 
-    pub fn rescan_dir(&mut self, dir: &String) -> Result<(), String> {
+    // TODO: implement this smarter, so it doesn't re-read all files
+    pub fn rescan_dir(
+        &mut self,
+        dir: &String,
+        state: tauri::State<AppState>,
+    ) -> Result<(), String> {
         if let Some(dir_with_files) = self.dirs.iter_mut().find(|d| &d.path == dir) {
-            *dir_with_files = DirWithFiles::new(dir)?;
+            *dir_with_files = DirWithFiles::new(dir, state)?;
             Ok(())
         } else {
             Err(format!("Directory '{}' not found", dir))

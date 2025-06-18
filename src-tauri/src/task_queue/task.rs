@@ -4,10 +4,17 @@ pub struct GenerateThumbTask {
     pub file: String,
 }
 
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct AnalyzeVideoTask {
+    pub dir: String,
+    pub file: String,
+}
+
 // Define different event types (must be Send + Sync + 'static)
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub enum Task {
     GenerateThumb(GenerateThumbTask),
+    AnalyzeVideo(AnalyzeVideoTask),
 
     // Test task events
     Log { message: String },

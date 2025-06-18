@@ -24,6 +24,9 @@ pub fn gen_ffmpeg_vid_tiled_thumb(file_absolute_path: String) {
         .frames(1)
         .output(output_name);
 
+    // cli commands would look like this:
+    // ffmpeg -i in-high.mp4 -vf "fps=1,scale=160:-2,tile=3x3" -frames:v 1 out.webp
+
     println!("FFmpeg command: {:?}", _command);
 
     let _ = _command.spawn().unwrap().wait();
