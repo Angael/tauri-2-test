@@ -15,7 +15,7 @@ pub fn add_dir(dir: String, state: tauri::State<AppState>) -> Result<(), String>
 
     state
         .files_in_dirs
-        .with_mut(|files_in_dirs| files_in_dirs.add_dir(dir, state))?
+        .with_mut(|files_in_dirs| files_in_dirs.add_dir(dir, &state))?
 }
 
 #[tauri::command]
@@ -33,5 +33,5 @@ pub fn rescan_dir(dir: String, state: tauri::State<AppState>) -> Result<(), Stri
 
     state
         .files_in_dirs
-        .with_mut(|files_in_dirs| files_in_dirs.rescan_dir(&dir, state))?
+        .with_mut(|files_in_dirs| files_in_dirs.rescan_dir(&dir, &state))?
 }

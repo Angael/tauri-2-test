@@ -12,7 +12,7 @@ pub struct DirWithFiles {
 }
 
 impl DirWithFiles {
-    pub fn new(dir: &String, state: tauri::State<AppState>) -> Result<Self, String> {
+    pub fn new(dir: &String, state: &tauri::State<AppState>) -> Result<Self, String> {
         let dir_clone = dir.clone();
         let entries = std::fs::read_dir(dir)
             .map_err(|e| format!("Failed to read directory '{}': {}", dir_clone, e))?;
@@ -59,12 +59,12 @@ pub struct FilesInDirs {
 
 impl FilesInDirs {
     // TODO: Add functions add_dir, rm_dir, rescan_dir, rescan_all
-    pub fn add_dir(&mut self, dir: String, state: tauri::State<AppState>) -> Result<(), String> {
+    pub fn add_dir(&mut self, dir: String, state: &tauri::State<AppState>) -> Result<(), String> {
         if self.dirs.iter().any(|d| d.path == dir) {
             return Err(format!("Directory '{}' already exists", dir));
         }
 
-        let dir_with_files = DirWithFiles::new(&dir, state)?;
+        let dir_with_files = DirWithFiles::new(&dir, &state)?;
         self.dirs.push(dir_with_files);
         Ok(())
     }
@@ -82,7 +82,7 @@ impl FilesInDirs {
     pub fn rescan_dir(
         &mut self,
         dir: &String,
-        state: tauri::State<AppState>,
+        state: &tauri::State<AppState>,
     ) -> Result<(), String> {
         if let Some(dir_with_files) = self.dirs.iter_mut().find(|d| &d.path == dir) {
             *dir_with_files = DirWithFiles::new(dir, state)?;
