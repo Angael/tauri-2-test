@@ -10,6 +10,11 @@ use crate::{
 
 const VIDEO_EXTENSIONS: [&str; 6] = [".mp4", ".mkv", ".avi", ".mov", ".flv", ".wmv"];
 
+fn approx_video_bitrate(file_size_bytes: u64, duration_secs: f64, audio_fraction: f64) -> u32 {
+    let bits = (file_size_bytes as f64) * 8.0 * (1.0 - audio_fraction);
+    (bits / duration_secs).round() as u32
+}
+
 pub fn handle_task_analyze_video(task: AnalyzeVideoTask, app_handle: &tauri::AppHandle) {
     let is_analyzed: bool = app_handle.state::<AppState>().files_in_dirs.with(|s| {
         for dir in s.dirs.iter() {
@@ -54,7 +59,8 @@ pub fn handle_task_analyze_video(task: AnalyzeVideoTask, app_handle: &tauri::App
     };
 
     let video_stats = VideoStats {
-        dur: v_stream
+        dur: info
+            .format
             .duration
             .as_ref()
             .and_then(|d| d.parse::<f64>().ok())
@@ -67,7 +73,16 @@ pub fn handle_task_analyze_video(task: AnalyzeVideoTask, app_handle: &tauri::App
             .bit_rate
             .as_ref()
             .and_then(|bit_rate| bit_rate.parse::<u32>().ok())
-            .unwrap_or(0),
+            .unwrap_or_else(|| {
+                if let Some(duration_str) = &info.format.duration {
+                    if let (Ok(size), Ok(duration)) =
+                        (info.format.size.parse::<u64>(), duration_str.parse::<f64>())
+                    {
+                        return approx_video_bitrate(size, duration, 0.08_f64);
+                    }
+                }
+                0
+            }),
     };
 
     // Save the analysis result to the app state
