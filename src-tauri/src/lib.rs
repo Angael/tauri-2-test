@@ -70,6 +70,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             files_in_dirs_cmd::get_files_in_dirs,
+            files_in_dirs_cmd::get_dir,
             files_in_dirs_cmd::add_dir,
             files_in_dirs_cmd::remove_dir,
             files_in_dirs_cmd::rescan_dir,

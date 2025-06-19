@@ -1,17 +1,12 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
 import Layout from "../../components/Layout";
 import AddSavedFolder from "./AddSavedFolder";
-import { FilesInDirs } from "./FilesInDirs.type";
 import SavedFolder from "./SavedFolder";
+import { useDirs } from "./useDirs";
 
 const SavedDirs = () => {
-  const dirsQuery = useQuery({
-    queryKey: ["get_files_in_dirs"],
-    queryFn: async () => {
-      return await invoke<FilesInDirs>("get_files_in_dirs");
-    }
-  });
+  const dirsQuery = useDirs();
 
   const addFolderMut = useMutation({
     mutationKey: ["add_dir"],

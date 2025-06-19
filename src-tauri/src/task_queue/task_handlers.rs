@@ -10,12 +10,23 @@ use crate::{
 
 const VIDEO_EXTENSIONS: [&str; 6] = [".mp4", ".mkv", ".avi", ".mov", ".flv", ".wmv"];
 
+fn is_video_file(filename: &str) -> bool {
+    VIDEO_EXTENSIONS
+        .iter()
+        .any(|ext| filename.to_lowercase().ends_with(ext))
+}
+
 fn approx_video_bitrate(file_size_bytes: u64, duration_secs: f64, audio_fraction: f64) -> u32 {
     let bits = (file_size_bytes as f64) * 8.0 * (1.0 - audio_fraction);
     (bits / duration_secs).round() as u32
 }
 
 pub fn handle_task_analyze_video(task: AnalyzeVideoTask, app_handle: &tauri::AppHandle) {
+    if !is_video_file(&task.file) {
+        println!("Skipping non-video file for analysis: {}", task.file);
+        return;
+    }
+
     let is_analyzed: bool = app_handle.state::<AppState>().files_in_dirs.with(|s| {
         for dir in s.dirs.iter() {
             if dir.path == task.dir {
@@ -108,11 +119,7 @@ pub fn handle_task_analyze_video(task: AnalyzeVideoTask, app_handle: &tauri::App
 pub fn handle_task_generate_thumb(task: GenerateThumbTask, app_handle: &tauri::AppHandle) {
     // println!("Handling GenerateThumb task for file: {}", task.file);
 
-    let is_video: bool = VIDEO_EXTENSIONS
-        .iter()
-        .any(|ext| task.file.to_lowercase().ends_with(ext));
-
-    if !is_video {
+    if !is_video_file(&task.file) {
         println!("Skipping non-video file: {}", task.file);
         return;
     }

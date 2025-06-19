@@ -1,4 +1,7 @@
-use crate::{app_state::AppState, files_in_dirs::model::FilesInDirs};
+use crate::{
+    app_state::AppState,
+    files_in_dirs::model::{DirWithFiles, FilesInDirs},
+};
 
 #[tauri::command]
 pub fn get_files_in_dirs(state: tauri::State<AppState>) -> FilesInDirs {
@@ -7,6 +10,15 @@ pub fn get_files_in_dirs(state: tauri::State<AppState>) -> FilesInDirs {
     state
         .files_in_dirs
         .with(|files_in_dirs| files_in_dirs.clone())
+}
+
+#[tauri::command]
+pub fn get_dir(dir: String, state: tauri::State<AppState>) -> Option<DirWithFiles> {
+    println!("get_dir");
+
+    return state
+        .files_in_dirs
+        .with(|files_in_dirs| files_in_dirs.dirs.iter().find(|d| d.path.eq(&dir)).cloned());
 }
 
 #[tauri::command]

@@ -7,14 +7,18 @@ import {
   Stack
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { NavLink } from "react-router";
+import { NavLink, useLocation } from "react-router";
 
 type Props = {
   children: React.ReactNode;
+  containerProps?: React.ComponentProps<typeof Container>;
 };
 
-const Layout = ({ children }: Props) => {
+const Layout = ({ children, containerProps }: Props) => {
   const [opened, { toggle }] = useDisclosure();
+  const location = useLocation();
+
+  const isStillViewer = location.pathname.startsWith("/viewer");
 
   return (
     <AppShell
@@ -34,6 +38,7 @@ const Layout = ({ children }: Props) => {
           to="/"
           label="Viewer"
           style={{ textDecoration: "none" }}
+          active={isStillViewer}
         />
         <MantineNavLink
           component={NavLink}
@@ -49,7 +54,7 @@ const Layout = ({ children }: Props) => {
         />
       </AppShell.Navbar>
       <AppShell.Main>
-        <Container>
+        <Container {...containerProps}>
           <Stack>{children}</Stack>
         </Container>
       </AppShell.Main>
