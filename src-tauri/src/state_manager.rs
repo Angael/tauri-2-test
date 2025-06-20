@@ -20,10 +20,14 @@ where
     /// Loads state from a JSON file, or creates a default state if the file
     /// doesn't exist or is invalid.
     pub fn load(path: PathBuf) -> Self {
-        let state = if path.exists() {
-            fs::read_to_string(&path)
+        let path_with_ext = path.with_extension("msgpack");
+        let state = if path_with_ext.exists() {
+            println!("Loading state from: {}", path_with_ext.display());
+
+            // JSON way requires fs::read_to_string, and then json_serde::from_string or something like that
+            fs::read(&path_with_ext)
                 .ok()
-                .and_then(|content| serde_json::from_str(&content).ok())
+                .and_then(|content| rmp_serde::from_slice(&content).ok())
                 .unwrap_or_else(|| {
                     eprintln!("Failed to read or parse JSON file at: {}", path.display());
                     T::default()
@@ -50,7 +54,17 @@ where
         let data = serde_json::to_string_pretty(&*state_guard)
             .map_err(|e| format!("Failed to serialize state: {}", e))?;
 
-        fs::write(&self.path, data).map_err(|e| format!("Failed to write to disk: {}", e))
+        // for testing purposes, also save as msgpack
+        let msgpack_data = rmp_serde::to_vec(&*state_guard)
+            .map_err(|e| format!("Failed to serialize state to msgpack: {}", e))?;
+        let msgpack_path = self.path.with_extension("msgpack");
+
+        println!("Saving state");
+        fs::write(self.path.with_extension("json"), data)
+            .map_err(|e| format!("Failed to write to disk: {}", e))?;
+
+        fs::write(&msgpack_path, msgpack_data)
+            .map_err(|e| format!("Failed to write msgpack to disk: {}", e))
     }
 
     /// Provides safe, read-only access to the state via a closure.

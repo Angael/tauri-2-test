@@ -61,8 +61,8 @@ pub fn run() {
 
             app.manage(AppState {
                 event_queue,
-                app_config: JsonState::load(app_data_dir.join("app_config.json")),
-                files_in_dirs: JsonState::load(app_data_dir.join("files_in_dirs.json")),
+                app_config: JsonState::load(app_data_dir.join("app_config")),
+                files_in_dirs: JsonState::load(app_data_dir.join("files_in_dirs")),
             }); // Make AppState available to commands
 
             Ok(())
