@@ -5,17 +5,22 @@ import "@mantine/notifications/styles.css";
 
 import "./App.css";
 
-import { MantineProvider } from "@mantine/core";
+import { createTheme, MantineProvider } from "@mantine/core";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider } from "react-router";
 import { queryClient } from "./queryClient";
 import { router } from "./routes/router";
 import { Notifications } from "@mantine/notifications";
 
+const theme = createTheme({
+  defaultRadius: "lg",
+  primaryColor: "grape"
+});
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <MantineProvider>
+      <MantineProvider theme={theme}>
         <RouterProvider router={router} />
         <Notifications />
       </MantineProvider>

@@ -20,6 +20,8 @@ const File = ({ dir, file }: Props) => {
   //   return convertFileSrc(dir + "\\" + file.name);
   // }, [dir, file.name]);
 
+  const hasThumbnail = false;
+
   return (
     <div ref={ref} className={css.fileWrapper}>
       {inViewport && <FilePlaceholder file={file} />}

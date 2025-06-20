@@ -82,7 +82,7 @@ const SavedDir = ({ dir }: Props) => {
       </Stack>
 
       <Group wrap="nowrap" ml="auto" style={{ flexShrink: 0 }}>
-        <Button variant="outline" onClick={onOpen} disabled={disabled}>
+        <Button onClick={onOpen} disabled={disabled}>
           Open
         </Button>
         <Button
