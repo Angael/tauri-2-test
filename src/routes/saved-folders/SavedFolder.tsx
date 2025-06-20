@@ -1,16 +1,27 @@
 import { Button, Group, Stack, Text } from "@mantine/core";
 import { useMutation } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
-import { memo, useEffect, useState } from "react";
-import { DirWithFiles } from "./FilesInDirs.type";
 import { listen } from "@tauri-apps/api/event";
+import { memo, useEffect, useMemo } from "react";
+import { DirWithFiles } from "./FilesInDirs.type";
+import numeral from "numeral";
+import { useNavigate } from "react-router";
 
 interface Props {
   dir: DirWithFiles;
 }
 
 const SavedDir = ({ dir }: Props) => {
-  const [generatedThumbs, setGeneratedThumbs] = useState(0);
+  const stats = useMemo(() => {
+    return dir.files.reduce(
+      (acc, file) => {
+        acc.videos += file.video_stats ? 1 : 0;
+        acc.totalSize += file.size;
+        return acc;
+      },
+      { videos: 0, totalSize: 0 }
+    );
+  }, [dir.files]);
 
   const removeFolderMut = useMutation({
     mutationKey: ["remove_saved_folder"],
@@ -31,6 +42,12 @@ const SavedDir = ({ dir }: Props) => {
     mutationFn: async (path: string) =>
       await invoke("generate_thumbnails", { dir: path })
   });
+
+  const navigate = useNavigate();
+
+  const onOpen = () => {
+    navigate(`/viewer-dir/${encodeURIComponent(dir.path)}`);
+  };
 
   const disabled =
     removeFolderMut.isPending ||
@@ -57,14 +74,17 @@ const SavedDir = ({ dir }: Props) => {
           {dir.path}
         </Text>
         <Text size="sm" c="gray" style={{ userSelect: "text" }}>
-          {dir.files.length} files
+          {dir.files.length} files, {numeral(stats.totalSize).format("0.00b")}
         </Text>
         <Text size="sm" c="gray" style={{ userSelect: "text" }}>
-          {generatedThumbs} thumbnails generated
+          {stats.videos} videos
         </Text>
       </Stack>
 
       <Group wrap="nowrap" ml="auto" style={{ flexShrink: 0 }}>
+        <Button variant="outline" onClick={onOpen} disabled={disabled}>
+          Open
+        </Button>
         <Button
           variant="outline"
           onClick={() => generateThumbs.mutate(dir.path)}

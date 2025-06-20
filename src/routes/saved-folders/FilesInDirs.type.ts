@@ -1,6 +1,17 @@
 export interface File {
   name: string;
   size: number;
+
+  video_stats?: {
+    /** Duration in seconds */
+    dur: number;
+
+    /** Resolution of the video (width, height) in px */
+    res: [number, number];
+
+    /** Bitrate in kbps */
+    br: number;
+  };
 }
 
 export interface DirWithFiles {

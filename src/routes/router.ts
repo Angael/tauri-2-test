@@ -1,13 +1,13 @@
 import { createBrowserRouter } from "react-router";
-import SavedDirs from "./saved-folders/SavedFolders";
 import Config from "./config/Config";
-import Viewer from "./viewer/Viewer";
+import SavedDirs from "./saved-folders/SavedFolders";
 import ViewerDir from "./viewer-dir/ViewerDir";
+import Layout from "../components/Layout";
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    Component: Viewer,
+    Component: SavedDirs,
     index: true
   },
   {
@@ -15,12 +15,12 @@ export const router = createBrowserRouter([
     Component: ViewerDir
   },
   {
-    path: "/saved-dirs",
-    Component: SavedDirs,
-    index: true
-  },
-  {
     path: "/config",
     Component: Config
+  },
+  // catch all
+  {
+    path: "*",
+    Component: Layout
   }
 ]);

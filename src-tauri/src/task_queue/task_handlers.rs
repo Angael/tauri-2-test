@@ -142,6 +142,15 @@ pub fn handle_task_generate_thumb(task: GenerateThumbTask, app_handle: &tauri::A
         return None;
     });
 
+    // get cache dir to put thumbs in:
+    app_handle.path().app_cache_dir();
+
+    // create names for thumb with nanoid
+    todo!("Implement thumbnail generation logic here");
+
+    // write thumbnail to file info
+    // For example, you might want to store the thumbnail path in the file's metadata.
+
     // Here you would implement the logic to generate the thumbnail.
     // For example, you might call a function that uses FFmpeg to create the thumbnail.
     // gen_ffmpeg_vid_tiled_thumb(dir, file);

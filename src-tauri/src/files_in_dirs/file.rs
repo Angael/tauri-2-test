@@ -3,7 +3,6 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct VideoStats {
     /** Duration in seconds */
-    /** Resolution of the video (width, height) */
     pub dur: f64,
 
     /** Resolution of the video (width, height) in px */

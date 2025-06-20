@@ -4,6 +4,10 @@ import Layout from "../../components/Layout";
 import { useQuery } from "@tanstack/react-query";
 import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 import { DirWithFiles } from "../saved-folders/FilesInDirs.type";
+import File from "./File";
+import css from "./ViewerDir.module.css";
+
+// import { join } from "@tauri-apps/api/path";
 
 const ViewerDir = () => {
   const location = useLocation();
@@ -30,21 +34,11 @@ const ViewerDir = () => {
       <Title order={2}>{params.dirPath}</Title>
       <Stack pos="relative">
         <LoadingOverlay visible={dirQuery.isLoading} />
-        <Group wrap="wrap">
+        <div className={css.grid}>
           {dirQuery.data?.files.map((file) => (
-            <img
-              src={convertFileSrc(dirQuery.data?.path + "\\" + file.name)}
-              alt={file.name}
-              key={file.path}
-              style={{
-                width: "100px",
-                height: "100px",
-                objectFit: "cover",
-                margin: "5px"
-              }}
-            />
+            <File key={file.name} dir={dirQuery.data.path} file={file} />
           ))}
-        </Group>
+        </div>
         <pre>
           {dirQuery.isLoading && "Loading..."}
           {dirQuery.isError && "Error loading directory."}
