@@ -9,6 +9,8 @@
         "@mantine/dates": "^8.0.2",
         "@mantine/hooks": "^8.0.2",
         "@mantine/notifications": "^8.1.0",
+        "@mdi/js": "^7.4.47",
+        "@mdi/react": "^1.6.1",
         "@tanstack/react-query": "^5.80.5",
         "@tauri-apps/api": "^2",
         "@tauri-apps/plugin-opener": "^2",
@@ -155,6 +157,10 @@
     "@mantine/notifications": ["@mantine/notifications@8.1.0", "", { "dependencies": { "@mantine/store": "8.1.0", "react-transition-group": "4.4.5" }, "peerDependencies": { "@mantine/core": "8.1.0", "@mantine/hooks": "8.1.0", "react": "^18.x || ^19.x", "react-dom": "^18.x || ^19.x" } }, "sha512-MuTl3OVOaZko+fCxbi+1J2/7Ho6443aMDBV93UGwLfRfi6SwCMgv9Luj7LXG7JKLgYgWy3Uj9gOSXS6efNfmww=="],
 
     "@mantine/store": ["@mantine/store@8.1.0", "", { "peerDependencies": { "react": "^18.x || ^19.x" } }, "sha512-PobjhLuTIPtv3EkWkz+axmcPqrA8E2rSrUCm76CiddkZf6INaV9bQGzt7UpyoKQzu8jWuy/WUltdKPScwUfQBg=="],
+
+    "@mdi/js": ["@mdi/js@7.4.47", "", {}, "sha512-KPnNOtm5i2pMabqZxpUz7iQf+mfrYZyKCZ8QNz85czgEt7cuHcGorWfdzUMWYA0SD+a6Hn4FmJ+YhzzzjkTZrQ=="],
+
+    "@mdi/react": ["@mdi/react@1.6.1", "", { "dependencies": { "prop-types": "^15.7.2" } }, "sha512-4qZeDcluDFGFTWkHs86VOlHkm6gnKaMql13/gpIcUQ8kzxHgpj31NuCkD8abECVfbULJ3shc7Yt4HJ6Wu6SN4w=="],
 
     "@nodelib/fs.scandir": ["@nodelib/fs.scandir@2.1.5", "", { "dependencies": { "@nodelib/fs.stat": "2.0.5", "run-parallel": "^1.1.9" } }, "sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g=="],
 

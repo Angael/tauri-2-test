@@ -1,16 +1,15 @@
-import { Group, LoadingOverlay, Stack, Title } from "@mantine/core";
-import { useLocation, useParams } from "react-router";
-import Layout from "../../components/Layout";
+import { LoadingOverlay, Stack, Title } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { convertFileSrc, invoke } from "@tauri-apps/api/core";
+import { invoke } from "@tauri-apps/api/core";
+import { useParams } from "react-router";
+import Layout from "../../components/Layout";
 import { DirWithFiles } from "../saved-folders/FilesInDirs.type";
-import File from "./File";
+import File from "./file/File";
 import css from "./ViewerDir.module.css";
 
 // import { join } from "@tauri-apps/api/path";
 
 const ViewerDir = () => {
-  const location = useLocation();
   const params = useParams();
 
   const dirQuery = useQuery({
@@ -19,18 +18,8 @@ const ViewerDir = () => {
     enabled: !!params.dirPath // Only run if dirPath is defined
   });
 
-  console.log({
-    location,
-    params,
-    dirQuery: {
-      isLoading: dirQuery.isLoading,
-      isError: dirQuery.isError,
-      data: dirQuery.data
-    }
-  });
-
   return (
-    <Layout containerProps={{ size: "xl" }}>
+    <Layout containerProps={{ size: "100%" }}>
       <Title order={2}>{params.dirPath}</Title>
       <Stack pos="relative">
         <LoadingOverlay visible={dirQuery.isLoading} />
@@ -39,15 +28,6 @@ const ViewerDir = () => {
             <File key={file.name} dir={dirQuery.data.path} file={file} />
           ))}
         </div>
-        <pre>
-          {dirQuery.isLoading && "Loading..."}
-          {dirQuery.isError && "Error loading directory."}
-          {dirQuery.data ? (
-            JSON.stringify(dirQuery.data, null, 2)
-          ) : (
-            <span>No data available</span>
-          )}
-        </pre>
       </Stack>
     </Layout>
   );

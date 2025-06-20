@@ -1,4 +1,6 @@
 .fileWrapper {
   outline: 1px solid var(--mantine-color-dark-5);
   border-radius: 10px;
+
+  overflow: hidden;
 }
