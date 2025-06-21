@@ -11,7 +11,6 @@ use crate::app_state::AppState;
 use crate::state_manager::JsonState;
 use crate::task_queue::task_queue::{start_event_consumer, ThreadSafeEventQueue};
 use ffmpeg_sidecar::command::ffmpeg_is_installed;
-use nanoid::nanoid;
 use tauri::{Manager, WindowEvent};
 
 // Import command functions to shorten generate_handler references
@@ -61,20 +60,17 @@ pub fn run() {
             let files_in_dirs_clone = files_in_dirs.clone();
             
             window.on_window_event(move |event| {
-                match event {
-                    WindowEvent::CloseRequested { .. } => {
-                        // Perform blocking saves to ensure data persistence before shutdown
-                        if let Err(e) = app_config_clone.force_save_blocking() {
-                            eprintln!("Failed to save app config on shutdown: {}", e);
-                        }
-                        if let Err(e) = files_in_dirs_clone.force_save_blocking() {
-                            eprintln!("Failed to save files_in_dirs on shutdown: {}", e);
-                        }
-                        
-                        // Close the window after saving
-                        let _ = window_clone.close();
+                if let WindowEvent::CloseRequested { .. } = event {
+                    // Perform blocking saves to ensure data persistence before shutdown
+                    if let Err(e) = app_config_clone.force_save_blocking() {
+                        eprintln!("Failed to save app config on shutdown: {}", e);
                     }
-                    _ => {}
+                    if let Err(e) = files_in_dirs_clone.force_save_blocking() {
+                        eprintln!("Failed to save files_in_dirs on shutdown: {}", e);
+                    }
+                    
+                    // Close the window after saving
+                    let _ = window_clone.close();
                 }
             });
             

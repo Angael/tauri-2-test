@@ -16,9 +16,9 @@ pub fn get_files_in_dirs(state: tauri::State<AppState>) -> FilesInDirs {
 pub fn get_dir(dir: String, state: tauri::State<AppState>) -> Option<DirWithFiles> {
     println!("get_dir");
 
-    return state
+    state
         .files_in_dirs
-        .with(|files_in_dirs| files_in_dirs.dirs.iter().find(|d| d.path.eq(&dir)).cloned());
+        .with(|files_in_dirs| files_in_dirs.dirs.iter().find(|d| d.path.eq(&dir)).cloned())
 }
 
 #[tauri::command]

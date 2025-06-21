@@ -1,7 +1,7 @@
 // src/state_manager.rs
 use serde::{de::DeserializeOwned, Serialize};
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::mpsc::{self, Receiver, Sender};
 use std::sync::{Arc, RwLock};
 use std::thread;
@@ -193,7 +193,7 @@ where
     }
     /// Internal method to save state to disk in both JSON and MessagePack formats.
     /// Used by both the background save thread and the legacy synchronous save method.
-    fn save_state_to_disk(state: &Arc<RwLock<T>>, path: &PathBuf) -> Result<(), String> {
+    fn save_state_to_disk(state: &Arc<RwLock<T>>, path: &Path) -> Result<(), String> {
         if let Some(parent_dir) = path.parent() {
             fs::create_dir_all(parent_dir)
                 .map_err(|e| format!("Failed to create directory: {}", e))?;

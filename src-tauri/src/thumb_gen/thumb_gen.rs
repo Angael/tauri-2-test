@@ -10,9 +10,9 @@
 use ffmpeg_sidecar::command::FfmpegCommand;
 use image::{imageops::FilterType, ImageFormat, ImageReader};
 use std::error::Error;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
-pub fn gen_ffmpeg_vid_tiled_thumb(file_absolute_path: String, thumbnail_dir: &PathBuf) {
+pub fn gen_ffmpeg_vid_tiled_thumb(file_absolute_path: String, thumbnail_dir: &Path) {
     println!("do_ffmpeg_stuff: {:?}", file_absolute_path);
 
     let input = file_absolute_path.clone();
@@ -23,7 +23,7 @@ pub fn gen_ffmpeg_vid_tiled_thumb(file_absolute_path: String, thumbnail_dir: &Pa
         .hide_banner()
         .overwrite()
         .input(input)
-        .args(&["-vf", "fps=1,scale=160:-2,tile=3x3"])
+        .args(["-vf", "fps=1,scale=160:-2,tile=3x3"])
         .frames(1)
         .output(output_name.to_str().unwrap());
 
@@ -37,7 +37,7 @@ pub fn gen_ffmpeg_vid_tiled_thumb(file_absolute_path: String, thumbnail_dir: &Pa
 
 pub fn gen_image_thumb(
     file_absolute_path: String,
-    thumbnail_dir: &PathBuf,
+    thumbnail_dir: &Path,
 ) -> Result<(), Box<dyn Error>> {
     println!("Generating image thumbnail for: {:?}", file_absolute_path);
 

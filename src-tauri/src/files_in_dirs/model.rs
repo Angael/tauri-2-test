@@ -92,7 +92,7 @@ impl FilesInDirs {
             return Err(format!("Directory '{}' already exists", dir));
         }
 
-        let dir_with_files = DirWithFiles::new(&dir, &state)?;
+        let dir_with_files = DirWithFiles::new(&dir, state)?;
         self.dirs.push(dir_with_files);
         Ok(())
     }

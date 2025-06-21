@@ -15,6 +15,12 @@ pub struct ThreadSafeEventQueue {
     inner: Arc<(Mutex<VecDeque<Task>>, Condvar)>,
 }
 
+impl Default for ThreadSafeEventQueue {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ThreadSafeEventQueue {
     pub fn new() -> Self {
         Self {
@@ -51,6 +57,11 @@ impl ThreadSafeEventQueue {
     pub fn len(&self) -> usize {
         let (lock, _) = &*self.inner;
         lock.lock().unwrap().len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        let (lock, _) = &*self.inner;
+        lock.lock().unwrap().is_empty()
     }
 }
 
