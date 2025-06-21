@@ -7,9 +7,10 @@
 // best tiles?
 // probably 3x3
 
-use std::path::PathBuf;
-
 use ffmpeg_sidecar::command::FfmpegCommand;
+use image::{imageops::FilterType, ImageFormat, ImageReader};
+use std::error::Error;
+use std::path::{Path, PathBuf};
 
 pub fn gen_ffmpeg_vid_tiled_thumb(file_absolute_path: String, thumbnail_dir: &PathBuf) {
     println!("do_ffmpeg_stuff: {:?}", file_absolute_path);
@@ -32,4 +33,36 @@ pub fn gen_ffmpeg_vid_tiled_thumb(file_absolute_path: String, thumbnail_dir: &Pa
     println!("FFmpeg command: {:?}", _command);
 
     let _ = _command.spawn().unwrap().wait();
+}
+
+pub fn gen_image_thumb(
+    file_absolute_path: String,
+    thumbnail_dir: &PathBuf,
+) -> Result<(), Box<dyn Error>> {
+    println!("Generating image thumbnail for: {:?}", file_absolute_path);
+
+    // Attempt to open the image file from the provided path.
+    // The `?` operator propagates any errors, such as file not found
+    // or permission denied, returning them from the function.
+    let img = ImageReader::open(file_absolute_path)?.decode()?;
+
+    // Create a 256x256 thumbnail.
+    // `resize_to_fill` resizes the image to fill the specified dimensions,
+    // maintaining the aspect ratio by cropping the excess. This is ideal
+    // for creating uniformly-sized thumbnails without distortion.
+    // `FilterType::Lanczos3` is a high-quality resampling filter, which is
+    // well-suited for downscaling images while preserving detail.
+    let thumbnail = img.resize_to_fill(256, 256, FilterType::Lanczos3);
+
+    // Construct the full path for the output thumbnail file.
+    // It joins the provided directory path with the desired filename.
+    let thumbnail_path = thumbnail_dir.join("thumbnail.avif");
+
+    // thumbnail.
+    // Save the generated thumbnail to the specified path in AVIF format.
+    // This operation can fail if the directory is not writable or if there's
+    // an issue with the AVIF encoder.
+    thumbnail.save_with_format(&thumbnail_path, ImageFormat::Avif)?;
+
+    Ok(())
 }

@@ -1,23 +1,44 @@
 use ffprobe::ffprobe;
-use std::{
-    path::{Path, PathBuf},
-    thread,
-};
+use std::path::{Path, PathBuf};
 use tauri::{Emitter, Manager};
 
 use crate::{
     app_state::AppState,
     files_in_dirs::file::VideoStats,
     task_queue::task::{AnalyzeVideoTask, GenerateThumbTask},
-    thumb_gen::thumb_gen::gen_ffmpeg_vid_tiled_thumb,
+    thumb_gen::thumb_gen::{gen_ffmpeg_vid_tiled_thumb, gen_image_thumb},
 };
 
 const VIDEO_EXTENSIONS: [&str; 7] = [".webm", ".mp4", ".mkv", ".avi", ".mov", ".flv", ".wmv"];
+const IMAGE_EXTENSIONS: [&str; 8] = [
+    ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".webp", ".avif",
+];
 
-fn is_video_file(filename: &str) -> bool {
-    VIDEO_EXTENSIONS
+#[derive(PartialEq)]
+enum FileType {
+    Video,
+    Image,
+    Other,
+}
+
+fn get_file_type(filename: &str) -> FileType {
+    let lower_filename = filename.to_lowercase();
+
+    if VIDEO_EXTENSIONS
         .iter()
-        .any(|ext| filename.to_lowercase().ends_with(ext))
+        .any(|ext| lower_filename.ends_with(ext))
+    {
+        return FileType::Video;
+    }
+
+    if IMAGE_EXTENSIONS
+        .iter()
+        .any(|ext| lower_filename.ends_with(ext))
+    {
+        return FileType::Image;
+    }
+
+    FileType::Other
 }
 
 fn approx_video_bitrate(file_size_bytes: u64, duration_secs: f64, audio_fraction: f64) -> u32 {
@@ -41,7 +62,7 @@ pub fn handle_task_analyze_video(task: AnalyzeVideoTask, app_handle: &tauri::App
         }
     };
 
-    if !is_video_file(&file.name) {
+    if get_file_type(&file.name) != FileType::Video {
         println!("Skipping non-video file for analysis: {}", file.name);
         return;
     }
@@ -126,8 +147,9 @@ pub fn handle_task_generate_thumb(task: GenerateThumbTask, app_handle: &tauri::A
         }
     };
 
-    if !is_video_file(&file.name) {
-        println!("Skipping non-video file: {}", file.name);
+    let file_type = get_file_type(&file.name);
+    if file_type == FileType::Other {
+        println!("Skipping \"other\" file: {}", file.name);
         return;
     }
 
@@ -136,6 +158,7 @@ pub fn handle_task_generate_thumb(task: GenerateThumbTask, app_handle: &tauri::A
         .path()
         .app_cache_dir()
         .expect("Error getting cache dir")
+        .join("files")
         .join(file.id);
 
     // Ensure the thumbnail directory exists
@@ -146,9 +169,15 @@ pub fn handle_task_generate_thumb(task: GenerateThumbTask, app_handle: &tauri::A
         .to_string_lossy()
         .to_string();
 
-    gen_ffmpeg_vid_tiled_thumb(input_path_str, &thumbnail_dir);
-
-    thread::sleep(std::time::Duration::from_millis(200));
+    match file_type {
+        FileType::Video => {
+            gen_ffmpeg_vid_tiled_thumb(input_path_str, &thumbnail_dir);
+        }
+        FileType::Image => {
+            let _ = gen_image_thumb(input_path_str, &thumbnail_dir);
+        }
+        _ => (),
+    }
 
     app_handle.emit("task_generate_thumb", task).unwrap();
 }
