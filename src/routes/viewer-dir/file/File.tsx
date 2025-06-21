@@ -9,7 +9,7 @@ type Props = {
   file: DirWithFiles["files"][number];
 };
 
-const File = ({ dir, file }: Props) => {
+const File = ({ dir: _, file }: Props) => {
   const { ref, inViewport } = useInViewport();
 
   // const src = useMemo(() => {
@@ -20,7 +20,7 @@ const File = ({ dir, file }: Props) => {
   //   return convertFileSrc(dir + "\\" + file.name);
   // }, [dir, file.name]);
 
-  const hasThumbnail = false;
+  // const hasThumbnail = file;
 
   return (
     <div ref={ref} className={css.fileWrapper}>

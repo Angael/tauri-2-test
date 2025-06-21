@@ -84,8 +84,12 @@ pub fn run() {
                 files_in_dirs,
             }); // Make AppState available to commands
 
-            let test_id = nanoid!();
-            println!("Test id: {}", test_id);
+            #[cfg(debug_assertions)] // only in debug builds
+            {
+                let window = app.get_webview_window("main").unwrap();
+                window.open_devtools();
+                window.close_devtools();
+            }
 
             Ok(())
         })

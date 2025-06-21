@@ -1,11 +1,11 @@
 import { Button, Group, Stack, Text } from "@mantine/core";
 import { useMutation } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
-import { listen } from "@tauri-apps/api/event";
-import { memo, useEffect, useMemo } from "react";
-import { DirWithFiles } from "./FilesInDirs.type";
+// import { listen } from "@tauri-apps/api/event";
 import numeral from "numeral";
+import { memo, useMemo } from "react";
 import { useNavigate } from "react-router";
+import { DirWithFiles } from "./FilesInDirs.type";
 
 interface Props {
   dir: DirWithFiles;
@@ -54,18 +54,18 @@ const SavedDir = ({ dir }: Props) => {
     rescanDir.isPending ||
     generateThumbs.isPending;
 
-  useEffect(() => {
-    const unlistenPromise = listen("task_generate_thumb", (event) => {
-      console.log("Event processed:", event);
-      if (event.payload.dir === dir.path) {
-        setGeneratedThumbs((prev) => prev + 1);
-      }
-    });
+  // useEffect(() => {
+  //   const unlistenPromise = listen("task_generate_thumb", (event) => {
+  //     console.log("Event processed:", event);
+  //     if (event.payload.dir === dir.path) {
+  //       setGeneratedThumbs((prev) => prev + 1);
+  //     }
+  //   });
 
-    return () => {
-      unlistenPromise.then((f) => f());
-    };
-  }, []);
+  //   return () => {
+  //     unlistenPromise.then((f) => f());
+  //   };
+  // }, []);
 
   return (
     <Group wrap="nowrap">
