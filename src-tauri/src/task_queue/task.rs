@@ -15,9 +15,4 @@ pub struct AnalyzeVideoTask {
 pub enum Task {
     GenerateThumb(GenerateThumbTask),
     AnalyzeVideo(AnalyzeVideoTask),
-
-    // Test task events
-    Log { message: String },
-    UserAction { user_id: u32, action: String },
-    SystemAlert { code: u16, description: String },
 }
