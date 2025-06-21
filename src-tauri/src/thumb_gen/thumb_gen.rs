@@ -7,13 +7,15 @@
 // best tiles?
 // probably 3x3
 
+use std::path::PathBuf;
+
 use ffmpeg_sidecar::command::FfmpegCommand;
 
-pub fn gen_ffmpeg_vid_tiled_thumb(file_absolute_path: String) {
+pub fn gen_ffmpeg_vid_tiled_thumb(file_absolute_path: String, thumbnail_dir: &PathBuf) {
     println!("do_ffmpeg_stuff: {:?}", file_absolute_path);
 
     let input = file_absolute_path.clone();
-    let output_name = input.clone() + ".webp";
+    let output_name = thumbnail_dir.join("thumbnail.webp");
 
     let mut binding = FfmpegCommand::new();
     let _command = binding
@@ -22,7 +24,7 @@ pub fn gen_ffmpeg_vid_tiled_thumb(file_absolute_path: String) {
         .input(input)
         .args(&["-vf", "fps=1,scale=160:-2,tile=3x3"])
         .frames(1)
-        .output(output_name);
+        .output(output_name.to_str().unwrap());
 
     // cli commands would look like this:
     // ffmpeg -i in-high.mp4 -vf "fps=1,scale=160:-2,tile=3x3" -frames:v 1 out.webp

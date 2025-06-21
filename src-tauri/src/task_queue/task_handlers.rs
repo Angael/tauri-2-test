@@ -1,11 +1,15 @@
 use ffprobe::ffprobe;
-use std::path::{Path, PathBuf};
+use std::{
+    path::{Path, PathBuf},
+    thread,
+};
 use tauri::{Emitter, Manager};
 
 use crate::{
     app_state::AppState,
     files_in_dirs::file::VideoStats,
     task_queue::task::{AnalyzeVideoTask, GenerateThumbTask},
+    thumb_gen::thumb_gen::gen_ffmpeg_vid_tiled_thumb,
 };
 
 const VIDEO_EXTENSIONS: [&str; 7] = [".webm", ".mp4", ".mkv", ".avi", ".mov", ".flv", ".wmv"];
@@ -22,37 +26,36 @@ fn approx_video_bitrate(file_size_bytes: u64, duration_secs: f64, audio_fraction
 }
 
 pub fn handle_task_analyze_video(task: AnalyzeVideoTask, app_handle: &tauri::AppHandle) {
-    if !is_video_file(&task.file) {
-        println!("Skipping non-video file for analysis: {}", task.file);
-        return;
-    }
-
-    let is_analyzed: bool = app_handle.state::<AppState>().files_in_dirs.with(|s| {
-        for dir in s.dirs.iter() {
-            if dir.path == task.dir {
-                if let Some(file) = dir.files.iter().find(|f| f.name == task.file) {
-                    // Check if the file has already been analyzed
-                    return file.video_stats.is_some();
-                }
-            }
+    let file = match app_handle
+        .state::<AppState>()
+        .files_in_dirs
+        .with(|s| s.find_file(&task.dir, &task.id).cloned())
+    {
+        Some(file) => file,
+        None => {
+            eprintln!(
+                "File with ID '{}' not found in directory '{}'",
+                task.id, task.dir
+            );
+            return;
         }
-        false
-    });
+    };
 
-    if is_analyzed {
-        println!(
-            "Video '{}' in directory '{}' has already been analyzed.",
-            task.file, task.dir
-        );
+    if !is_video_file(&file.name) {
+        println!("Skipping non-video file for analysis: {}", file.name);
         return;
     }
 
-    let path: PathBuf = Path::new(&task.dir).join(&task.file);
+    if file.video_stats.is_some() {
+        return;
+    }
+
+    let path: PathBuf = Path::new(&task.dir).join(&file.name);
 
     let info = match ffprobe(path) {
         Ok(info) => info,
         Err(e) => {
-            eprintln!("Failed to analyze video '{}': {}", task.file, e);
+            eprintln!("Failed to analyze video '{}': {}", file.name, e);
             return;
         }
     };
@@ -64,7 +67,7 @@ pub fn handle_task_analyze_video(task: AnalyzeVideoTask, app_handle: &tauri::App
     {
         Some(stream) => stream,
         None => {
-            eprintln!("No video stream found in '{}'", task.file);
+            eprintln!("No video stream found in '{}'", file.name);
             return;
         }
     };
@@ -98,72 +101,54 @@ pub fn handle_task_analyze_video(task: AnalyzeVideoTask, app_handle: &tauri::App
 
     // Save the analysis result to the app state
     let _ = app_handle.state::<AppState>().files_in_dirs.with_mut(|s| {
-        let target_file = s
-            .dirs
-            .iter_mut()
-            .find(|dir| dir.path == task.dir)
-            .and_then(|dir| dir.files.iter_mut().find(|f| f.name == task.file));
-
-        if let Some(file) = target_file {
+        if let Some(file) = s.find_file_mut(&task.dir, &task.id) {
             file.video_stats = Some(video_stats.clone());
-            println!(
-                "Video stats for '{}' in directory '{}' updated: {:?}",
-                task.file, task.dir, video_stats
-            );
+            println!("Analysis complete for: '{}'", file.name);
         } else {
-            eprintln!("File '{}' not found in directory '{}'", task.file, task.dir);
+            eprintln!("File '{}' not found in directory '{}'", file.name, task.dir);
         }
     });
 }
 
 pub fn handle_task_generate_thumb(task: GenerateThumbTask, app_handle: &tauri::AppHandle) {
-    // println!("Handling GenerateThumb task for file: {}", task.file);
+    let file: crate::files_in_dirs::file::File = match app_handle
+        .state::<AppState>()
+        .files_in_dirs
+        .with(|s| s.find_file(&task.dir, &task.id).cloned())
+    {
+        Some(file) => file,
+        None => {
+            eprintln!(
+                "File with ID '{}' not found in directory '{}'",
+                task.id, task.dir
+            );
+            return;
+        }
+    };
 
-    if !is_video_file(&task.file) {
-        println!("Skipping non-video file: {}", task.file);
+    if !is_video_file(&file.name) {
+        println!("Skipping non-video file: {}", file.name);
         return;
     }
 
-    let _file_in_state = app_handle.state::<AppState>().files_in_dirs.with(|s| {
-        for dir in s.dirs.iter() {
-            if dir.path == task.dir {
-                if let Some(file) = dir.files.iter().find(|f| f.name == task.file) {
-                    // Here you could add logic to analyze the video file if needed.
-                    // For example, you might want to extract metadata or perform some checks.
-                    println!("Found video file: {} in directory: {}", file.name, task.dir);
-                    return Some(file.clone());
-                } else {
-                    println!("File {} not found in directory {}", task.file, task.dir);
-                    return None;
-                }
-            }
-        }
-
-        return None;
-    });
-
     // get cache dir to put thumbs in:
-    app_handle.path().app_cache_dir();
+    let thumbnail_dir = app_handle
+        .path()
+        .app_cache_dir()
+        .expect("Error getting cache dir")
+        .join(file.id);
 
-    // create names for thumb with nanoid
-    todo!("Implement thumbnail generation logic here");
+    // Ensure the thumbnail directory exists
+    std::fs::create_dir_all(&thumbnail_dir).expect("Failed to create thumbnail directory");
 
-    // write thumbnail to file info
-    // For example, you might want to store the thumbnail path in the file's metadata.
+    let input_path_str = Path::new(&task.dir)
+        .join(&file.name)
+        .to_string_lossy()
+        .to_string();
 
-    // Here you would implement the logic to generate the thumbnail.
-    // For example, you might call a function that uses FFmpeg to create the thumbnail.
-    // gen_ffmpeg_vid_tiled_thumb(dir, file);
+    gen_ffmpeg_vid_tiled_thumb(input_path_str, &thumbnail_dir);
 
-    // Sleep for 500ms
-    // thread::sleep(std::time::Duration::from_millis(200));
+    thread::sleep(std::time::Duration::from_millis(200));
 
-    // Simulate a successful operation
-    // println!(
-    //     "Thumbnail generated for {} in directory {}",
-    //     task.file, task.dir
-    // );
-
-    // Example: Emit the processed event to the frontend
     app_handle.emit("task_generate_thumb", task).unwrap();
 }

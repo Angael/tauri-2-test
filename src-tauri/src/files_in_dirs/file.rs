@@ -14,6 +14,7 @@ pub struct VideoStats {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct File {
+    pub id: String, // nanoid
     pub name: String,
     pub size: u64,
 
@@ -27,6 +28,7 @@ pub struct File {
 impl File {
     pub fn new(name: String, size: u64) -> Self {
         File {
+            id: nanoid::nanoid!(),
             name,
             size,
             // original_file: None,

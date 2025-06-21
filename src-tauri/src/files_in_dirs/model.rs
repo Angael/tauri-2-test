@@ -1,7 +1,7 @@
 use crate::{
     app_state::AppState,
     files_in_dirs::file::File,
-    task_queue::task::{AnalyzeVideoTask, Task},
+    task_queue::task::{AnalyzeVideoTask, GenerateThumbTask, Task},
 };
 use serde::{Deserialize, Serialize};
 
@@ -30,6 +30,7 @@ impl DirWithFiles {
                 let metadata = path.metadata().unwrap();
 
                 let file = File {
+                    id: nanoid::nanoid!(),
                     name: path.file_name().unwrap().to_string_lossy().into_owned(),
                     size: metadata.len(),
                     video_stats: None,
@@ -41,7 +42,14 @@ impl DirWithFiles {
                     .event_queue
                     .enqueue(Task::AnalyzeVideo(AnalyzeVideoTask {
                         dir: dir_clone.clone(),
-                        file: file.name.clone(),
+                        id: file.id.clone(),
+                    }));
+
+                state
+                    .event_queue
+                    .enqueue(Task::GenerateThumb(GenerateThumbTask {
+                        dir: dir_clone.clone(),
+                        id: file.id.clone(),
                     }));
             }
         }
@@ -58,6 +66,26 @@ pub struct FilesInDirs {
 }
 
 impl FilesInDirs {
+    /// Finds a file by directory path and file id
+    pub fn find_file(&self, dir: &str, id: &str) -> Option<&File> {
+        self.dirs
+            .iter()
+            .find(|d| d.path == dir)?
+            .files
+            .iter()
+            .find(|f| f.id == id)
+    }
+
+    /// Finds a mutable file by directory path and file id
+    pub fn find_file_mut(&mut self, dir: &str, id: &str) -> Option<&mut File> {
+        self.dirs
+            .iter_mut()
+            .find(|d| d.path == dir)?
+            .files
+            .iter_mut()
+            .find(|f| f.id == id)
+    }
+
     // TODO: Add functions add_dir, rm_dir, rescan_dir, rescan_all
     pub fn add_dir(&mut self, dir: String, state: &tauri::State<AppState>) -> Result<(), String> {
         if self.dirs.iter().any(|d| d.path == dir) {

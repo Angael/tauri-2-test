@@ -1,13 +1,13 @@
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct GenerateThumbTask {
     pub dir: String,
-    pub file: String,
+    pub id: String,
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct AnalyzeVideoTask {
     pub dir: String,
-    pub file: String,
+    pub id: String,
 }
 
 // Define different event types (must be Send + Sync + 'static)

@@ -11,6 +11,7 @@ use crate::app_state::AppState;
 use crate::state_manager::JsonState;
 use crate::task_queue::task_queue::{start_event_consumer, ThreadSafeEventQueue};
 use ffmpeg_sidecar::command::ffmpeg_is_installed;
+use nanoid::nanoid;
 use tauri::{Manager, WindowEvent};
 
 // Import command functions to shorten generate_handler references
@@ -82,6 +83,9 @@ pub fn run() {
                 app_config,
                 files_in_dirs,
             }); // Make AppState available to commands
+
+            let test_id = nanoid!();
+            println!("Test id: {}", test_id);
 
             Ok(())
         })

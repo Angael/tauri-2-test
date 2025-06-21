@@ -24,7 +24,7 @@ pub fn generate_thumbnails(state: tauri::State<AppState>, dir: String) -> Result
             .event_queue
             .enqueue(Task::GenerateThumb(GenerateThumbTask {
                 dir: dir.clone(),
-                file: file.name.clone(),
+                id: file.id.clone(),
             }));
     }
 
