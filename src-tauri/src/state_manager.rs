@@ -27,19 +27,22 @@ impl<T> JsonState<T>
 where
     T: Serialize + DeserializeOwned + Default + Send + Sync + 'static,
 {
-    /// Loads state from a JSON file, or creates a default state if the file
-    /// doesn't exist or is invalid.
+    /// Loads state from a MessagePack file, or creates a default state if the file
+    /// doesn't exist or is invalid. Also starts the background save thread.
     pub fn load(path: PathBuf) -> Self {
         let path_with_ext = path.with_extension("msgpack");
         let state = if path_with_ext.exists() {
             println!("Loading state from: {}", path_with_ext.display());
 
-            // JSON way requires fs::read_to_string, and then json_serde::from_string or something like that
+            // Load from MessagePack format for efficiency
             fs::read(&path_with_ext)
                 .ok()
                 .and_then(|content| rmp_serde::from_slice(&content).ok())
                 .unwrap_or_else(|| {
-                    eprintln!("Failed to read or parse JSON file at: {}", path.display());
+                    eprintln!(
+                        "Failed to read or parse MessagePack file at: {}",
+                        path.display()
+                    );
                     T::default()
                 })
         } else {
@@ -62,8 +65,9 @@ where
             save_trigger: tx,
         }
     }
-
-    /// Saves the current state to its JSON file.
+    /// Saves the current state to both JSON and MessagePack files.
+    /// This is the legacy synchronous save method - prefer using the automatic
+    /// debounced saves triggered by with_mut() for better performance.
     /// This operation acquires a read lock on the state.
     pub fn save(&self) -> Result<(), String> {
         if let Some(parent_dir) = self.path.parent() {
@@ -73,14 +77,12 @@ where
 
         let state_guard = self.state.read().map_err(|e| e.to_string())?;
         let data = serde_json::to_string_pretty(&*state_guard)
-            .map_err(|e| format!("Failed to serialize state: {}", e))?;
-
-        // for testing purposes, also save as msgpack
+            .map_err(|e| format!("Failed to serialize state: {}", e))?; // Save in both JSON (human-readable) and MessagePack (efficient) formats
         let msgpack_data = rmp_serde::to_vec(&*state_guard)
             .map_err(|e| format!("Failed to serialize state to msgpack: {}", e))?;
         let msgpack_path = self.path.with_extension("msgpack");
 
-        println!("Saving state");
+        println!("Saving state (synchronous)");
         fs::write(self.path.with_extension("json"), data)
             .map_err(|e| format!("Failed to write to disk: {}", e))?;
 
@@ -97,7 +99,9 @@ where
         f(&*state_guard)
     }
     /// Provides safe, mutable access to the state via a closure.
-    /// After the closure finishes, a debounced save is triggered.
+    /// After the closure finishes, a debounced save is automatically triggered.
+    /// This is the preferred way to modify state as it provides SSD-friendly
+    /// save throttling while maintaining data safety.
     pub fn with_mut<F, R>(&self, f: F) -> Result<R, String>
     where
         F: FnOnce(&mut T) -> R,
@@ -115,8 +119,9 @@ where
 
         Ok(result)
     }
-
-    /// Forces an immediate save (useful for shutdown or critical operations)
+    /// Forces an immediate save by sending a high-priority save request
+    /// to the background thread. Useful for application shutdown or critical
+    /// operations where data loss must be avoided.
     pub fn force_save(&self) -> Result<(), String> {
         let _ = self.save_trigger.send(SaveRequest {
             timestamp: Instant::now(),
@@ -125,7 +130,19 @@ where
         Ok(())
     }
 
-    /// Background thread that handles debounced and safety saves
+    /// Performs an immediate, blocking save bypassing the background thread.
+    /// Use this method only for application shutdown to ensure data is saved
+    /// before the process terminates.
+    pub fn force_save_blocking(&self) -> Result<(), String> {
+        Self::save_state_to_disk(&self.state, &self.path)
+    }
+    /// Background thread that handles debounced and safety saves.
+    ///
+    /// Features:
+    /// - Debounced saves: Waits 1.5s after last modification before saving
+    /// - Safety saves: Automatically saves every 15s regardless of activity
+    /// - Force saves: Processes immediate save requests (e.g., on shutdown)
+    /// - Efficient batching: Multiple rapid changes result in single save operation
     fn background_save_loop(receiver: Receiver<SaveRequest>, state: Arc<RwLock<T>>, path: PathBuf) {
         let debounce_duration = Duration::from_millis(1500); // 1.5 second debounce
         let safety_save_interval = Duration::from_secs(15); // Safety save every 15 seconds
@@ -157,9 +174,8 @@ where
                 // Safety save only
                 now.duration_since(last_save_time) >= safety_save_interval
             };
-
             if should_save && last_request.is_some() {
-                // Drain any additional requests (they're all for the current state)
+                // Drain any additional requests (they're all for the same latest state)
                 while receiver.try_recv().is_ok() {}
 
                 // Perform the actual save
@@ -175,8 +191,8 @@ where
 
         println!("Background save thread shutting down");
     }
-
-    /// Internal method to save state to disk
+    /// Internal method to save state to disk in both JSON and MessagePack formats.
+    /// Used by both the background save thread and the legacy synchronous save method.
     fn save_state_to_disk(state: &Arc<RwLock<T>>, path: &PathBuf) -> Result<(), String> {
         if let Some(parent_dir) = path.parent() {
             fs::create_dir_all(parent_dir)
@@ -187,7 +203,7 @@ where
         let data = serde_json::to_string_pretty(&*state_guard)
             .map_err(|e| format!("Failed to serialize state: {}", e))?;
 
-        // for testing purposes, also save as msgpack
+        // Save in both JSON (human-readable) and MessagePack (efficient) formats
         let msgpack_data = rmp_serde::to_vec(&*state_guard)
             .map_err(|e| format!("Failed to serialize state to msgpack: {}", e))?;
         let msgpack_path = path.with_extension("msgpack");
@@ -200,7 +216,8 @@ where
     }
 }
 
-// Allow cloning the handle to the state, not the state itself.
+// Cloning a JsonState creates a new handle to the same shared state and background thread.
+// This enables safe sharing across multiple threads while maintaining single-source-of-truth.
 impl<T> Clone for JsonState<T>
 where
     T: Serialize + DeserializeOwned + Default + Send + Sync + 'static,

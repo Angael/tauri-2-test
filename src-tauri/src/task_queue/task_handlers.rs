@@ -8,7 +8,7 @@ use crate::{
     task_queue::task::{AnalyzeVideoTask, GenerateThumbTask},
 };
 
-const VIDEO_EXTENSIONS: [&str; 6] = [".mp4", ".mkv", ".avi", ".mov", ".flv", ".wmv"];
+const VIDEO_EXTENSIONS: [&str; 7] = [".webm", ".mp4", ".mkv", ".avi", ".mov", ".flv", ".wmv"];
 
 fn is_video_file(filename: &str) -> bool {
     VIDEO_EXTENSIONS

@@ -11,7 +11,7 @@ use crate::app_state::AppState;
 use crate::state_manager::JsonState;
 use crate::task_queue::task_queue::{start_event_consumer, ThreadSafeEventQueue};
 use ffmpeg_sidecar::command::ffmpeg_is_installed;
-use tauri::Manager;
+use tauri::{Manager, WindowEvent};
 
 // Import command functions to shorten generate_handler references
 use crate::config::config_cmd;
@@ -42,13 +42,6 @@ pub fn run() {
 
             let event_queue = ThreadSafeEventQueue::new();
 
-            
-
-            // Single consumer approach
-            // This clones the Arc, allowing shared ownership.
-            // let queue_for_consumer = event_queue.clone();
-            // start_event_consumer(queue_for_consumer, app_handle);
-
             // Start multiple consumers for load balancing
             for _ in 0..3 {
                 let queue_for_consumer = event_queue.clone();
@@ -56,13 +49,38 @@ pub fn run() {
                 std::thread::spawn(move || {
                     start_event_consumer(queue_for_consumer, app_handle_clone);
                 });
-            }
+            }            
             
+            let app_config = JsonState::load(app_data_dir.join("app_config"));
+            let files_in_dirs = JsonState::load(app_data_dir.join("files_in_dirs"));
 
+            let window = app_handle.get_webview_window("main").unwrap();
+            let window_clone = window.clone();
+            let app_config_clone = app_config.clone();
+            let files_in_dirs_clone = files_in_dirs.clone();
+            
+            window.on_window_event(move |event| {
+                match event {
+                    WindowEvent::CloseRequested { .. } => {
+                        // Perform blocking saves to ensure data persistence before shutdown
+                        if let Err(e) = app_config_clone.force_save_blocking() {
+                            eprintln!("Failed to save app config on shutdown: {}", e);
+                        }
+                        if let Err(e) = files_in_dirs_clone.force_save_blocking() {
+                            eprintln!("Failed to save files_in_dirs on shutdown: {}", e);
+                        }
+                        
+                        // Close the window after saving
+                        let _ = window_clone.close();
+                    }
+                    _ => {}
+                }
+            });
+            
             app.manage(AppState {
                 event_queue,
-                app_config: JsonState::load(app_data_dir.join("app_config")),
-                files_in_dirs: JsonState::load(app_data_dir.join("files_in_dirs")),
+                app_config,
+                files_in_dirs,
             }); // Make AppState available to commands
 
             Ok(())
