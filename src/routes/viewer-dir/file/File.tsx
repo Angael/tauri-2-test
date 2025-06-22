@@ -1,8 +1,12 @@
 import { useInViewport } from "@mantine/hooks";
-import { memo } from "react";
-import { DirWithFiles } from "../../saved-folders/FilesInDirs.type";
+import { memo, useEffect } from "react";
+import {
+  DirWithFiles,
+  TaskGenerateThumbEvent
+} from "../../saved-folders/FilesInDirs.type";
 import css from "./File.module.css";
 import FilePlaceholder from "./FilePlaceholder";
+import { listen } from "@tauri-apps/api/event";
 
 type Props = {
   dir: string;
@@ -21,6 +25,22 @@ const File = ({ dir: _, file }: Props) => {
   // }, [dir, file.name]);
 
   // const hasThumbnail = file;
+
+  // useEffect(() => {
+  //   const unlistenPromise = listen<TaskGenerateThumbEvent>(
+  //     "task_generate_thumb",
+  //     (event) => {
+  //       console.log("Event processed:", event);
+  //       // if (event.payload.dir === dir.path) {
+  //       //   setGeneratedThumbs((prev) => prev + 1);
+  //       // }
+  //     }
+  //   );
+
+  //   return () => {
+  //     unlistenPromise.then((f) => f());
+  //   };
+  // }, []);
 
   return (
     <div ref={ref} className={css.fileWrapper}>
