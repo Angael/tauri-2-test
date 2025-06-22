@@ -14,6 +14,8 @@ interface Props {
 }
 
 const SavedDir = ({ dir }: Props) => {
+  // TODO this is bad, because when it unmounts, progress looks reset
+  // TBH the only progression is to mark items as processed, somewhere in tauri state :(
   const [processedElements, setProcessedElements] = useState<number[]>([]);
 
   const resetProcessedElements = () => setProcessedElements([]);
