@@ -110,9 +110,13 @@ pub fn handle_task_analyze_video(task: AnalyzeVideoTask, app_handle: &tauri::App
             .and_then(|bit_rate| bit_rate.parse::<u32>().ok())
             .unwrap_or_else(|| {
                 if let Some(duration_str) = &info.format.duration {
-                    if let (Ok(size), Ok(duration)) =
-                        (info.format.size.parse::<u64>(), duration_str.parse::<f64>())
-                    {
+                    if let (Ok(size), Ok(duration)) = (
+                        info.format
+                            .size
+                            .expect("FFprobe didn't supply size")
+                            .parse::<u64>(),
+                        duration_str.parse::<f64>(),
+                    ) {
                         return approx_video_bitrate(size, duration, 0.08_f64);
                     }
                 }

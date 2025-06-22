@@ -84,10 +84,6 @@ pub fn start_event_consumer(queue: ThreadSafeEventQueue, app_handle: AppHandle) 
                 Task::AnalyzeVideo(task) => {
                     handle_task_analyze_video(task, &app_handle);
                 }
-                _ => {
-                    // Handle other task types here.
-                    println!("Unhandled task: {:?}", event);
-                }
             }
 
             // println!(
