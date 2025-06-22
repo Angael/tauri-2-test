@@ -37,21 +37,33 @@ impl DirWithFiles {
                 };
 
                 dir_with_files.files.push(file.clone());
-
-                state
-                    .event_queue
-                    .enqueue(Task::AnalyzeVideo(AnalyzeVideoTask {
-                        dir: dir_clone.clone(),
-                        id: file.id.clone(),
-                    }));
-
-                state
-                    .event_queue
-                    .enqueue(Task::GenerateThumb(GenerateThumbTask {
-                        dir: dir_clone.clone(),
-                        id: file.id.clone(),
-                    }));
             }
+        }
+
+        let total: u32 = dir_with_files
+            .files
+            .len()
+            .try_into()
+            .expect("Too many files in directory");
+
+        for (i, file) in dir_with_files.files.iter().enumerate() {
+            state
+                .event_queue
+                .enqueue(Task::AnalyzeVideo(AnalyzeVideoTask {
+                    dir: dir_clone.clone(),
+                    id: file.id.clone(),
+                }));
+
+            // TODO: RACE CONDITION: when events are processed simultaneously by different consumers
+
+            state
+                .event_queue
+                .enqueue(Task::GenerateThumb(GenerateThumbTask {
+                    dir: dir_clone.clone(),
+                    id: file.id.clone(),
+                    i: i as u32,
+                    total,
+                }));
         }
 
         Ok(dir_with_files)

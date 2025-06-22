@@ -1,12 +1,9 @@
 import { useInViewport } from "@mantine/hooks";
-import { memo, useEffect } from "react";
-import {
-  DirWithFiles,
-  TaskGenerateThumbEvent
-} from "../../saved-folders/FilesInDirs.type";
+import { memo } from "react";
+import { DirWithFiles } from "../../saved-folders/FilesInDirs.type";
 import css from "./File.module.css";
 import FilePlaceholder from "./FilePlaceholder";
-import { listen } from "@tauri-apps/api/event";
+// import { listen } from "@tauri-apps/api/event";
 
 type Props = {
   dir: string;

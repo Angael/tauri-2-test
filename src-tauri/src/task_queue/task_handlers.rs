@@ -154,6 +154,7 @@ pub fn handle_task_generate_thumb(task: GenerateThumbTask, app_handle: &tauri::A
     let file_type = get_file_type(&file.name);
     if file_type == FileType::Other {
         println!("Skipping \"other\" file: {}", file.name);
+        app_handle.emit("dir_scan_progress", task).unwrap();
         return;
     }
 
@@ -183,5 +184,5 @@ pub fn handle_task_generate_thumb(task: GenerateThumbTask, app_handle: &tauri::A
         _ => (),
     }
 
-    app_handle.emit("task_generate_thumb", task).unwrap();
+    app_handle.emit("dir_scan_progress", task).unwrap();
 }

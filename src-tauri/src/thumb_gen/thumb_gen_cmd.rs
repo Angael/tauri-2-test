@@ -20,12 +20,13 @@ pub fn generate_thumbnails(state: tauri::State<AppState>, dir: String) -> Result
     for file in files.iter() {
         println!("generate_thumbnails: {}", file.name);
 
-        state
-            .event_queue
-            .enqueue(Task::GenerateThumb(GenerateThumbTask {
-                dir: dir.clone(),
-                id: file.id.clone(),
-            }));
+        todo!("Implement manual thumbnail generation?");
+        // state
+        //     .event_queue
+        //     .enqueue(Task::GenerateThumb(GenerateThumbTask {
+        //         dir: dir.clone(),
+        //         id: file.id.clone(),
+        //     }));
     }
 
     Ok(())

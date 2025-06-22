@@ -2,6 +2,10 @@
 pub struct GenerateThumbTask {
     pub dir: String,
     pub id: String,
+    /** The index of the file being processed in dir */
+    pub i: u32,
+    /** The total number of files in the directory */
+    pub total: u32,
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]

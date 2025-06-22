@@ -22,8 +22,3 @@ export interface DirWithFiles {
 export interface FilesInDirs {
   dirs: Array<DirWithFiles>;
 }
-
-export type TaskGenerateThumbEvent = {
-  dir: string;
-  id: string;
-};

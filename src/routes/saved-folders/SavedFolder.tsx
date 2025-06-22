@@ -5,15 +5,18 @@ import { listen } from "@tauri-apps/api/event";
 import numeral from "numeral";
 import { memo, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import { DirWithFiles, TaskGenerateThumbEvent } from "./FilesInDirs.type";
+import { DirWithFiles } from "./FilesInDirs.type";
 import { Progress } from "@mantine/core";
+import { DirScanProgressEvent } from "../../types/tauriEvent.type";
 
 interface Props {
   dir: DirWithFiles;
 }
 
 const SavedDir = ({ dir }: Props) => {
-  const [processing, setProcessing] = useState<false | number>(false);
+  const [processedElements, setProcessedElements] = useState<number[]>([]);
+
+  const resetProcessedElements = () => setProcessedElements([]);
 
   const stats = useMemo(() => {
     return dir.files.reduce(
@@ -58,12 +61,12 @@ const SavedDir = ({ dir }: Props) => {
     generateThumbs.isPending;
 
   useEffect(() => {
-    const unlistenPromise = listen<TaskGenerateThumbEvent>(
-      "task_generate_thumb",
+    const unlistenPromise = listen<DirScanProgressEvent>(
+      "dir_scan_progress",
       (event) => {
-        console.log("Event processed:", event);
         if (event.payload.dir === dir.path) {
-          setProcessing((prev) => (prev || 0) + 1);
+          console.log("Event processed:", event);
+          setProcessedElements((prev) => [...prev, event.payload.i]);
         }
       }
     );
@@ -85,9 +88,11 @@ const SavedDir = ({ dir }: Props) => {
         <Text size="sm" c="gray" style={{ userSelect: "text" }}>
           {stats.videos} videos
         </Text>
-        {processing && (
+        {processedElements.length > 0 && (
           <Progress.Root size="xl">
-            <Progress.Section value={processing ?? 0}>
+            <Progress.Section
+              value={(100 * processedElements.length) / dir.files.length}
+            >
               <Progress.Label>Prepared files</Progress.Label>
             </Progress.Section>
           </Progress.Root>
@@ -100,14 +105,20 @@ const SavedDir = ({ dir }: Props) => {
         </Button>
         <Button
           variant="outline"
-          onClick={() => generateThumbs.mutate(dir.path)}
+          onClick={() => {
+            resetProcessedElements();
+            generateThumbs.mutate(dir.path);
+          }}
           disabled={disabled}
         >
           Generate thumbnails
         </Button>
         <Button
           variant="outline"
-          onClick={() => rescanDir.mutate(dir.path)}
+          onClick={() => {
+            resetProcessedElements();
+            rescanDir.mutate(dir.path);
+          }}
           disabled={disabled}
         >
           Sync
