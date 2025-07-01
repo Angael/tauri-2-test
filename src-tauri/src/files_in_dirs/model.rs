@@ -34,6 +34,7 @@ impl DirWithFiles {
                     name: path.file_name().unwrap().to_string_lossy().into_owned(),
                     size: metadata.len(),
                     video_stats: None,
+                    thumbs: None, // Thumbnails will be generated later
                 };
 
                 dir_with_files.files.push(file.clone());
@@ -112,6 +113,7 @@ impl FilesInDirs {
     pub fn remove_dir(&mut self, dir: &String) -> Result<(), String> {
         if let Some(pos) = self.dirs.iter().position(|d| &d.path == dir) {
             self.dirs.remove(pos);
+            // TODO queue removal of files in the dir.
             Ok(())
         } else {
             Err(format!("Directory '{}' not found", dir))
