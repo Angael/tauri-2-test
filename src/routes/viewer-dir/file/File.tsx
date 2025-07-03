@@ -1,8 +1,9 @@
 import { useInViewport } from "@mantine/hooks";
-import { memo } from "react";
+import { memo, use } from "react";
 import { DirWithFiles } from "../../saved-folders/FilesInDirs.type";
 import css from "./File.module.css";
 import FilePlaceholder from "./FilePlaceholder";
+import { convertFileSrc } from "@tauri-apps/api/core";
 // import { listen } from "@tauri-apps/api/event";
 
 type Props = {
@@ -39,9 +40,17 @@ const File = ({ dir: _, file }: Props) => {
   //   };
   // }, []);
 
+  // TODO: Remove hardcoded path
+  const src = convertFileSrc(
+    `C:\\Users\\krzys\\AppData\\Local\\com.tauri-2-test.app\\files\\${file.id}\\thumbnail.avif`
+  );
+
   return (
     <div ref={ref} className={css.fileWrapper}>
-      {inViewport && <FilePlaceholder file={file} />}
+      {/* {inViewport && <FilePlaceholder file={file} />} */}
+      {inViewport && (
+        <img src={src} alt={file.name} style={{ width: "100%" }} />
+      )}
     </div>
   );
 };

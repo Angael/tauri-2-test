@@ -41,7 +41,7 @@ where
                 .unwrap_or_else(|| {
                     eprintln!(
                         "Failed to read or parse MessagePack file at: {}",
-                        path.display()
+                        path_with_ext.display()
                     );
                     T::default()
                 })

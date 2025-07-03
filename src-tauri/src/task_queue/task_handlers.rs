@@ -174,14 +174,21 @@ pub fn handle_task_generate_thumb(task: GenerateThumbTask, app_handle: &tauri::A
         .to_string_lossy()
         .to_string();
 
-    match file_type {
-        FileType::Video => {
-            gen_ffmpeg_vid_tiled_thumb(input_path_str, &thumbnail_dir);
-        }
-        FileType::Image => {
-            let _ = gen_image_thumb(input_path_str, &thumbnail_dir);
-        }
-        _ => (),
+    let thumb = match file_type {
+        FileType::Video => gen_ffmpeg_vid_tiled_thumb(input_path_str, &thumbnail_dir),
+        FileType::Image => gen_image_thumb(input_path_str, &thumbnail_dir),
+        _ => Err("Unsupported file type".to_string()),
+    };
+
+    if let Ok(thumb_data) = thumb {
+        println!("thumb data {} {:?}", file.name, thumb_data);
+        let _ = app_handle.state::<AppState>().files_in_dirs.with_mut(|s| {
+            if let Some(file) = s.find_file_mut(&task.dir, &task.id) {
+                file.thumbs = Some(thumb_data);
+            } else {
+                eprintln!("File '{}' not found in directory '{}'", file.name, task.dir);
+            }
+        });
     }
 
     app_handle.emit("dir_scan_progress", task).unwrap();
