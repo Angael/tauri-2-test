@@ -1,5 +1,5 @@
 import { useInViewport } from "@mantine/hooks";
-import { memo, use } from "react";
+import { memo, use, useEffect, useRef } from "react";
 import { DirWithFiles } from "../../saved-folders/FilesInDirs.type";
 import css from "./File.module.css";
 import FilePlaceholder from "./FilePlaceholder";
@@ -11,8 +11,45 @@ type Props = {
   file: DirWithFiles["files"][number];
 };
 
+const TILE_SIZE = 256; // px
+const tile_rows_and_cols = 3; // 3 rows and 3 columns
+
 const File = ({ dir: _, file }: Props) => {
   const { ref, inViewport } = useInViewport();
+
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    // TODO: hack, change later
+    if (!file.video_stats) {
+      return;
+    }
+    let intervalRef = null as any;
+    let currentTile = 0;
+
+    const updateTilePosition = () => {
+      if (!imgRef.current) return;
+
+      const row = Math.floor(currentTile / tile_rows_and_cols);
+      const col = currentTile % tile_rows_and_cols;
+
+      const xOffset = -col * TILE_SIZE;
+      const yOffset = -row * TILE_SIZE;
+
+      imgRef.current.style.objectPosition = `${xOffset}px ${yOffset}px`;
+
+      currentTile =
+        (currentTile + 1) % (tile_rows_and_cols * tile_rows_and_cols);
+    };
+
+    intervalRef = setInterval(updateTilePosition, 250);
+
+    return () => {
+      if (intervalRef) {
+        clearInterval(intervalRef);
+      }
+    };
+  }, []);
 
   // const src = useMemo(() => {
   //   // TODO: works only on Windows, and bad performance?
@@ -49,7 +86,7 @@ const File = ({ dir: _, file }: Props) => {
     <div ref={ref} className={css.fileWrapper}>
       {/* {inViewport && <FilePlaceholder file={file} />} */}
       {inViewport && (
-        <img src={src} alt={file.name} style={{ width: "100%" }} />
+        <img ref={imgRef} className={css.thumbnail} src={src} alt={file.name} />
       )}
     </div>
   );

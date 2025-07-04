@@ -43,7 +43,8 @@ pub fn run() {
             let event_queue = ThreadSafeEventQueue::new();
 
             // Start multiple consumers for load balancing
-            for _ in 0..3 {
+            // TODO: Experiment with number of consumers
+            for _ in 0..1 {
                 let queue_for_consumer = event_queue.clone();
                 let app_handle_clone = app_handle.clone();
                 std::thread::spawn(move || {

@@ -1,6 +1,8 @@
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  grid-auto-rows: minmax(300px, auto);
+  /* // This is bad for tiled thumbnails for now
+  // grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); */
+  grid-template-columns: repeat(auto-fill, 256px);
+  grid-auto-rows: minmax(256px, auto);
   gap: 16px;
 }

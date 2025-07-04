@@ -164,7 +164,7 @@ pub fn handle_task_generate_thumb(task: GenerateThumbTask, app_handle: &tauri::A
         .app_cache_dir()
         .expect("Error getting cache dir")
         .join("files")
-        .join(file.id);
+        .join(&file.id);
 
     // Ensure the thumbnail directory exists
     std::fs::create_dir_all(&thumbnail_dir).expect("Failed to create thumbnail directory");
@@ -175,7 +175,7 @@ pub fn handle_task_generate_thumb(task: GenerateThumbTask, app_handle: &tauri::A
         .to_string();
 
     let thumb = match file_type {
-        FileType::Video => gen_ffmpeg_vid_tiled_thumb(input_path_str, &thumbnail_dir),
+        FileType::Video => gen_ffmpeg_vid_tiled_thumb(&file, input_path_str, &thumbnail_dir),
         FileType::Image => gen_image_thumb(input_path_str, &thumbnail_dir),
         _ => Err("Unsupported file type".to_string()),
     };

@@ -11,21 +11,32 @@ use ffmpeg_sidecar::command::FfmpegCommand;
 use image::{imageops::FilterType, ImageFormat, ImageReader};
 use std::path::Path;
 
-use crate::files_in_dirs::file::FileThumbs;
+use crate::files_in_dirs::file::{File, FileThumbs};
 
 const TILE_SIZE: u32 = 256;
+const ROWS: u32 = 3;
+const COLS: u32 = 3;
 
 pub fn gen_ffmpeg_vid_tiled_thumb(
+    file: &File,
     file_absolute_path: String,
     thumbnail_dir: &Path,
 ) -> Result<FileThumbs, String> {
-    println!("do_ffmpeg_stuff: {:?}", file_absolute_path);
+    println!("do_ffmpeg_stuff: {:?}", file.name);
 
     let input = file_absolute_path.clone();
     let output_name = thumbnail_dir.join("thumbnail.avif");
 
+    let mut fps: f64 = 1.0; // frames per second
+    if let Some(video_stats) = file.video_stats.as_ref() {
+        fps = f64::from(ROWS * COLS) / video_stats.dur;
+    }
+
     let mut binding = FfmpegCommand::new();
-    let vf_arg = format!("fps=1,scale={}:{},tile=3x3", TILE_SIZE, TILE_SIZE);
+    let vf_arg = format!(
+        "fps={},scale={}:{},tile={}x{}",
+        fps, TILE_SIZE, TILE_SIZE, COLS, ROWS
+    );
     let _command = binding
         .hide_banner()
         .overwrite()
