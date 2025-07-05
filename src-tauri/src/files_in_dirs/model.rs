@@ -1,6 +1,7 @@
 use crate::{
     app_state::AppState,
     files_in_dirs::file::File,
+    serde_utils::deserialize_vec_skip_errors,
     task_queue::task::{GenerateThumbTask, Task},
 };
 use serde::{Deserialize, Serialize};
@@ -8,6 +9,8 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct DirWithFiles {
     pub path: String,
+
+    #[serde(default, deserialize_with = "deserialize_vec_skip_errors")]
     pub files: Vec<File>,
 }
 

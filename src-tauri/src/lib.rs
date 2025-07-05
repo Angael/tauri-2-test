@@ -7,6 +7,7 @@ pub mod state_manager;
 pub mod task_queue;
 pub mod thumb_gen;
 pub mod video;
+pub mod serde_utils;
 
 use crate::app_state::AppState;
 use crate::state_manager::JsonState;
