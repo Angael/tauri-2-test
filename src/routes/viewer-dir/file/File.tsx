@@ -1,9 +1,8 @@
 import { useInViewport } from "@mantine/hooks";
-import { memo, use, useEffect, useRef } from "react";
+import { convertFileSrc } from "@tauri-apps/api/core";
+import { memo, useEffect, useRef } from "react";
 import { DirWithFiles } from "../../saved-folders/FilesInDirs.type";
 import css from "./File.module.css";
-import FilePlaceholder from "./FilePlaceholder";
-import { convertFileSrc } from "@tauri-apps/api/core";
 // import { listen } from "@tauri-apps/api/event";
 
 type Props = {
@@ -12,7 +11,7 @@ type Props = {
 };
 
 const TILE_SIZE = 256; // px
-const tile_rows_and_cols = 3; // 3 rows and 3 columns
+const tile_rows_and_cols = 4; // 3 rows and 3 columns
 
 const File = ({ dir: _, file }: Props) => {
   const { ref, inViewport } = useInViewport();
@@ -42,7 +41,7 @@ const File = ({ dir: _, file }: Props) => {
         (currentTile + 1) % (tile_rows_and_cols * tile_rows_and_cols);
     };
 
-    intervalRef = setInterval(updateTilePosition, 250);
+    intervalRef = setInterval(updateTilePosition, 150);
 
     return () => {
       if (intervalRef) {

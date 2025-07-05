@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+// TODO remove videostats step and analyze video always before processing
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct VideoStats {
     /** Duration in seconds */

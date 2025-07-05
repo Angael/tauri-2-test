@@ -14,8 +14,8 @@ use std::path::Path;
 use crate::files_in_dirs::file::{File, FileThumbs};
 
 const TILE_SIZE: u32 = 256;
-const ROWS: u32 = 3;
-const COLS: u32 = 3;
+const ROWS: u32 = 4;
+const COLS: u32 = 4;
 
 pub fn gen_ffmpeg_vid_tiled_thumb(
     file: &File,
@@ -33,20 +33,30 @@ pub fn gen_ffmpeg_vid_tiled_thumb(
     }
 
     let mut binding = FfmpegCommand::new();
+    // Without filling bars:
+    // let vf_arg = format!(
+    //     "fps={},scale={}:{},tile={}x{}",
+    //     fps, TILE_SIZE, TILE_SIZE, COLS, ROWS
+    // );
     let vf_arg = format!(
-        "fps={},scale={}:{},tile={}x{}",
-        fps, TILE_SIZE, TILE_SIZE, COLS, ROWS
+        "fps={fps},scale={w}:{h}:force_original_aspect_ratio=decrease,pad={w}:{h}:-1:-1,tile={cols}x{rows}",
+        fps = fps,
+        w = TILE_SIZE,
+        h = TILE_SIZE,
+        cols = COLS,
+        rows = ROWS
     );
     let _command = binding
         .hide_banner()
         .overwrite()
         .input(input)
-        .args(["-vf", &vf_arg])
+        .args(["-vf", &vf_arg, "-crf", "45"])
         .frames(1)
         .output(output_name.to_str().unwrap());
 
     // cli commands would look like this:
-    // ffmpeg -i in-high.mp4 -vf "fps=1,scale=160:-2,tile=3x3" -frames:v 1 out.webp
+    // ffmpeg -i in-d.mp4 -y -hide_banner -vf "fps=2,scale=256:256,tile=4x4" -frames:v 1 -crf 50 out.avif
+    // ffmpeg -i in-d.mp4 -y -hide_banner -vf "fps=3,scale=256:256,setpts=PTS/6" -an -crf 50 out.webm
 
     println!("FFmpeg command: {:?}", _command);
 
