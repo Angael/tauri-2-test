@@ -12,6 +12,7 @@ pub mod serde_utils;
 use crate::app_state::AppState;
 use crate::state_manager::JsonState;
 use crate::task_queue::task_queue::{start_event_consumer, ThreadSafeEventQueue};
+use crate::thumb_gen::thumb_store::ThumbnailStore;
 use ffmpeg_sidecar::command::ffmpeg_is_installed;
 use tauri::{Manager, WindowEvent};
 
@@ -77,6 +78,7 @@ pub fn run() {
             });
             
             app.manage(AppState {
+                thumbnail_store: ThumbnailStore::new(&app_handle),
                 event_queue,
                 app_config,
                 files_in_dirs,

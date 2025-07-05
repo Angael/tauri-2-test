@@ -63,15 +63,7 @@ pub fn handle_task_generate_thumb(task: GenerateThumbTask, app_handle: &tauri::A
     }
 
     // get cache dir to put thumbs in:
-    let thumbnail_dir = app_handle
-        .path()
-        .app_cache_dir()
-        .expect("Error getting cache dir")
-        .join("files")
-        .join(&file.id);
-
-    // Ensure the thumbnail directory exists
-    std::fs::create_dir_all(&thumbnail_dir).expect("Failed to create thumbnail directory");
+    let thumbnail_dir = &app_handle.state::<AppState>().thumbnail_store.dir;
 
     let input_path_str = Path::new(&task.dir)
         .join(&file.name)
