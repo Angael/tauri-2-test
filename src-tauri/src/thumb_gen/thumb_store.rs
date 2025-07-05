@@ -21,6 +21,12 @@ impl ThumbnailStore {
         self.dir.join(file_id)
     }
 
+    pub fn ensure_file_dir(&self, file_id: &str) -> std::path::PathBuf {
+        let file_dir = self.get_file_dir(file_id);
+        std::fs::create_dir_all(&file_dir).expect("Failed to create file directory");
+        file_dir
+    }
+
     pub fn get_thumbnail_path(&self, file_id: &str, thumb_name: &str) -> std::path::PathBuf {
         self.get_file_dir(file_id).join(thumb_name)
     }

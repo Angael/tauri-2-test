@@ -63,7 +63,10 @@ pub fn handle_task_generate_thumb(task: GenerateThumbTask, app_handle: &tauri::A
     }
 
     // get cache dir to put thumbs in:
-    let thumbnail_dir = &app_handle.state::<AppState>().thumbnail_store.dir;
+    let thumbnail_dir = &app_handle
+        .state::<AppState>()
+        .thumbnail_store
+        .ensure_file_dir(&task.id);
 
     let input_path_str = Path::new(&task.dir)
         .join(&file.name)

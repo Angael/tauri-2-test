@@ -36,7 +36,6 @@ pub fn remove_dir(dir: String, state: tauri::State<AppState>) -> Result<(), Stri
     println!("remove_dir: {:?}", dir);
 
     let mut file_ids_to_delete: Vec<String> = Vec::new();
-
     let _ = state.files_in_dirs.with_mut(|files_in_dirs| {
         // Collect file IDs to delete
         if let Some(dir) = files_in_dirs.dirs.iter().find(|d| d.path.eq(&dir)) {
@@ -48,17 +47,11 @@ pub fn remove_dir(dir: String, state: tauri::State<AppState>) -> Result<(), Stri
         files_in_dirs.remove_dir(&dir)
     })?;
 
-    let thumbnail_store = &state.thumbnail_store;
-
-    // log all folder paths to delete
     for file_id in &file_ids_to_delete {
-        let result = fs::remove_dir_all(thumbnail_store.get_file_dir(file_id));
+        let result = fs::remove_dir_all(&state.thumbnail_store.get_file_dir(file_id));
         match result {
             Err(err) => {
-                eprintln!(
-                    "Failed to remove directory for file ID '{}': {}",
-                    file_id, err
-                );
+                eprintln!("Err removing thumb dir {}, {}", file_id, err);
             }
             _ => (),
         };
