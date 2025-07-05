@@ -39,7 +39,7 @@ pub fn gen_ffmpeg_vid_tiled_thumb(
     //     fps, TILE_SIZE, TILE_SIZE, COLS, ROWS
     // );
     let vf_arg = format!(
-        "fps={fps},scale={w}:{h}:force_original_aspect_ratio=decrease,pad={w}:{h}:-1:-1,tile={cols}x{rows}",
+        "fps={fps},scale={w}:{h}:force_original_aspect_ratio=increase,crop={w}:{h},tile={cols}x{rows}",
         fps = fps,
         w = TILE_SIZE,
         h = TILE_SIZE,
@@ -55,7 +55,13 @@ pub fn gen_ffmpeg_vid_tiled_thumb(
         .output(output_name.to_str().unwrap());
 
     // cli commands would look like this:
-    // ffmpeg -i in-d.mp4 -y -hide_banner -vf "fps=2,scale=256:256,tile=4x4" -frames:v 1 -crf 50 out.avif
+    // Fill bars:
+    // ffmpeg -i in-d.mp4 -y -hide_banner -vf "fps=2,scale=256:256:force_original_aspect_ratio=decrease,pad=256:256:-1:-1,tile=4x4" -frames:v 1 -crf 50 out-bars.avif
+    // Cover:
+    // ffmpeg -i in-d.mp4 -y -hide_banner -vf "fps=2,scale=256:256:force_original_aspect_ratio=increase,crop=256:256,tile=4x4" -frames:v 1 -crf 50 out-cover.avif
+    // Bad scale to x:y:
+    // ffmpeg -i in-d.mp4 -y -hide_banner -vf "fps=2,scale=256:256,tile=4x4" -frames:v 1 -crf 50 out-scaled.avif
+    // Animated thumbnail:
     // ffmpeg -i in-d.mp4 -y -hide_banner -vf "fps=3,scale=256:256,setpts=PTS/6" -an -crf 50 out.webm
 
     println!("FFmpeg command: {:?}", _command);
