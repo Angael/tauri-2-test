@@ -2,6 +2,7 @@ use crate::{
     app_state::AppState,
     files_in_dirs::model::{DirWithFiles, FilesInDirs},
 };
+use std::fs;
 
 #[tauri::command]
 pub fn get_files_in_dirs(state: tauri::State<AppState>) -> FilesInDirs {
@@ -34,9 +35,36 @@ pub fn add_dir(dir: String, state: tauri::State<AppState>) -> Result<(), String>
 pub fn remove_dir(dir: String, state: tauri::State<AppState>) -> Result<(), String> {
     println!("remove_dir: {:?}", dir);
 
-    state
-        .files_in_dirs
-        .with_mut(|files_in_dirs| files_in_dirs.remove_dir(&dir))?
+    let mut file_ids_to_delete: Vec<String> = Vec::new();
+
+    let _ = state.files_in_dirs.with_mut(|files_in_dirs| {
+        // Collect file IDs to delete
+        if let Some(dir) = files_in_dirs.dirs.iter().find(|d| d.path.eq(&dir)) {
+            for file in &dir.files {
+                file_ids_to_delete.push(file.id.clone());
+            }
+        }
+
+        files_in_dirs.remove_dir(&dir)
+    })?;
+
+    let thumbnail_store = &state.thumbnail_store;
+
+    // log all folder paths to delete
+    for file_id in &file_ids_to_delete {
+        let result = fs::remove_dir_all(thumbnail_store.get_file_dir(file_id));
+        match result {
+            Err(err) => {
+                eprintln!(
+                    "Failed to remove directory for file ID '{}': {}",
+                    file_id, err
+                );
+            }
+            _ => (),
+        };
+    }
+
+    Ok(())
 }
 
 #[tauri::command]
