@@ -1,18 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-// TODO remove videostats step and analyze video always before processing
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct VideoStats {
-    /** Duration in seconds */
-    pub dur: f64,
-
-    /** Resolution of the video (width, height) in px */
-    pub res: (u16, u16),
-
-    /** Bitrate in kbps */
-    pub br: u32,
-}
-
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct FileThumbs {
     // Static thumbnails
@@ -36,10 +23,8 @@ pub struct File {
 
     // #[serde(default, skip_serializing_if = "Option::is_none")]
     pub thumbs: Option<FileThumbs>,
-
     // #[serde(default, skip_serializing_if = "Option::is_none")]
     // TODO: This won't work correctly, as there is no full path to the original file without the directory
     // pub original_file: Option<Box<File>>, // Placeholder for video analysis data
     // #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub video_stats: Option<VideoStats>, // Placeholder for video analysis data
 }

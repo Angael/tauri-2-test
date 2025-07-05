@@ -1,7 +1,7 @@
 use crate::{
     app_state::AppState,
     files_in_dirs::file::File,
-    task_queue::task::{AnalyzeVideoTask, GenerateThumbTask, Task},
+    task_queue::task::{GenerateThumbTask, Task},
 };
 use serde::{Deserialize, Serialize};
 
@@ -33,7 +33,6 @@ impl DirWithFiles {
                     id: nanoid::nanoid!(),
                     name: path.file_name().unwrap().to_string_lossy().into_owned(),
                     size: metadata.len(),
-                    video_stats: None,
                     thumbs: None, // Thumbnails will be generated later
                 };
 
@@ -48,15 +47,6 @@ impl DirWithFiles {
             .expect("Too many files in directory");
 
         for (i, file) in dir_with_files.files.iter().enumerate() {
-            state
-                .event_queue
-                .enqueue(Task::AnalyzeVideo(AnalyzeVideoTask {
-                    dir: dir_clone.clone(),
-                    id: file.id.clone(),
-                }));
-
-            // TODO: RACE CONDITION: when events are processed simultaneously by different consumers
-
             state
                 .event_queue
                 .enqueue(Task::GenerateThumb(GenerateThumbTask {

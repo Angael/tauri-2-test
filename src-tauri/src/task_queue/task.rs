@@ -8,15 +8,8 @@ pub struct GenerateThumbTask {
     pub total: u32,
 }
 
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
-pub struct AnalyzeVideoTask {
-    pub dir: String,
-    pub id: String,
-}
-
 // Define different event types (must be Send + Sync + 'static)
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub enum Task {
     GenerateThumb(GenerateThumbTask),
-    AnalyzeVideo(AnalyzeVideoTask),
 }

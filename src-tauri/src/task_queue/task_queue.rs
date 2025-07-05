@@ -4,7 +4,7 @@ use std::thread;
 use tauri::AppHandle;
 
 use crate::task_queue::task::Task;
-use crate::task_queue::task_handlers::{handle_task_analyze_video, handle_task_generate_thumb};
+use crate::task_queue::task_handlers::handle_task_generate_thumb;
 
 // A thread-safe, blocking event queue.
 #[derive(Clone)]
@@ -80,9 +80,6 @@ pub fn start_event_consumer(queue: ThreadSafeEventQueue, app_handle: AppHandle) 
             match event {
                 Task::GenerateThumb(task) => {
                     handle_task_generate_thumb(task, &app_handle);
-                }
-                Task::AnalyzeVideo(task) => {
-                    handle_task_analyze_video(task, &app_handle);
                 }
             }
 
