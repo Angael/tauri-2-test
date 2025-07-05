@@ -1,18 +1,14 @@
+export interface Thumbnail {
+  res: [number, number];
+  grid?: [number, number];
+}
+
 export interface File {
   id: string;
   name: string;
   size: number;
 
-  video_stats?: {
-    /** Duration in seconds */
-    dur: number;
-
-    /** Resolution of the video (width, height) in px */
-    res: [number, number];
-
-    /** Bitrate in kbps */
-    br: number;
-  };
+  thumbs: Thumbnail[];
 }
 
 export interface DirWithFiles {

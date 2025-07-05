@@ -12,13 +12,14 @@ use image::{imageops::FilterType, ImageFormat, ImageReader};
 use std::path::{Path, PathBuf};
 
 use crate::{
-    files_in_dirs::file::{File, FileThumbs},
+    files_in_dirs::file::File,
+    thumb_gen::thumbnail::Thumbnail,
     video::analyze::{analyze_video, VideoStats},
 };
 
-const TILE_SIZE: u32 = 256;
-const ROWS: u32 = 4;
-const COLS: u32 = 4;
+const TILE_SIZE: u16 = 256;
+const ROWS: u8 = 4;
+const COLS: u8 = 4;
 
 /*
 cli commands would look like this:
@@ -36,7 +37,7 @@ pub fn gen_ffmpeg_vid_tiled_thumb(
     file: &File,
     file_absolute_path: String,
     thumbnail_dir: &Path,
-) -> Result<FileThumbs, String> {
+) -> Result<Thumbnail, String> {
     println!("do_ffmpeg_stuff: {:?}", file.name);
 
     let input = file_absolute_path.clone();
@@ -69,20 +70,16 @@ pub fn gen_ffmpeg_vid_tiled_thumb(
 
     let _ = _command.spawn().unwrap().wait();
 
-    Ok(FileThumbs {
-        t256: true,
-        s256: false,
-        s512: false,
-        t512: false,
-        a256: false,
-        a512: false,
+    Ok(Thumbnail {
+        res: (TILE_SIZE, TILE_SIZE),
+        grid: Some((COLS, ROWS)),
     })
 }
 
 pub fn gen_image_thumb(
     file_absolute_path: String,
     thumbnail_dir: &Path,
-) -> Result<FileThumbs, String> {
+) -> Result<Thumbnail, String> {
     println!("Generating image thumbnail for: {:?}", file_absolute_path);
 
     let img = ImageReader::open(file_absolute_path)
@@ -92,7 +89,7 @@ pub fn gen_image_thumb(
     // let width = img.width();
     // let height = img.height();
 
-    let thumbnail = img.resize_to_fill(TILE_SIZE, TILE_SIZE, FilterType::Lanczos3);
+    let thumbnail = img.resize_to_fill(TILE_SIZE.into(), TILE_SIZE.into(), FilterType::Lanczos3);
 
     let thumbnail_path = thumbnail_dir.join("thumbnail.avif");
 
@@ -100,12 +97,8 @@ pub fn gen_image_thumb(
         .save_with_format(&thumbnail_path, ImageFormat::Avif)
         .map_err(|err| format!("Failed to save thumbnail: {}", err))?;
 
-    Ok(FileThumbs {
-        t256: false,
-        s256: true,
-        s512: false,
-        t512: false,
-        a256: false,
-        a512: false,
+    Ok(Thumbnail {
+        res: (TILE_SIZE, TILE_SIZE),
+        grid: None,
     })
 }

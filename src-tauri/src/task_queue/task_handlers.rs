@@ -88,7 +88,7 @@ pub fn handle_task_generate_thumb(task: GenerateThumbTask, app_handle: &tauri::A
         println!("thumb data {} {:?}", file.name, thumb_data);
         let _ = app_handle.state::<AppState>().files_in_dirs.with_mut(|s| {
             if let Some(file) = s.find_file_mut(&task.dir, &task.id) {
-                file.thumbs = Some(thumb_data);
+                file.thumbs.push(thumb_data);
             } else {
                 eprintln!("File '{}' not found in directory '{}'", file.name, task.dir);
             }

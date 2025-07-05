@@ -36,7 +36,7 @@ impl DirWithFiles {
                     id: nanoid::nanoid!(),
                     name: path.file_name().unwrap().to_string_lossy().into_owned(),
                     size: metadata.len(),
-                    thumbs: None, // Thumbnails will be generated later
+                    thumbs: Vec::new(), // Thumbnails will be generated later
                 };
 
                 dir_with_files.files.push(file.clone());

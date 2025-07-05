@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use crate::thumb_gen::thumbnail::Thumbnail;
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct FileThumbs {
     // Static thumbnails
@@ -21,5 +23,5 @@ pub struct File {
     pub name: String,
     pub size: u64,
 
-    pub thumbs: Option<FileThumbs>,
+    pub thumbs: Vec<Thumbnail>,
 }
