@@ -23,11 +23,10 @@ const SavedDir = ({ dir }: Props) => {
   const stats = useMemo(() => {
     return dir.files.reduce(
       (acc, file) => {
-        acc.videos += file.video_stats ? 1 : 0;
         acc.totalSize += file.size;
         return acc;
       },
-      { videos: 0, totalSize: 0 }
+      { totalSize: 0 }
     );
   }, [dir.files]);
 
@@ -86,9 +85,6 @@ const SavedDir = ({ dir }: Props) => {
         </Text>
         <Text size="sm" c="gray" style={{ userSelect: "text" }}>
           {dir.files.length} files, {numeral(stats.totalSize).format("0.00b")}
-        </Text>
-        <Text size="sm" c="gray" style={{ userSelect: "text" }}>
-          {stats.videos} videos
         </Text>
         {processedElements.length > 0 && (
           <Progress.Root size="xl">
