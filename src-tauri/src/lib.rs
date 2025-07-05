@@ -17,7 +17,6 @@ use tauri::{Manager, WindowEvent};
 // Import command functions to shorten generate_handler references
 use crate::config::config_cmd;
 use crate::files_in_dirs::files_in_dirs_cmd;
-use crate::thumb_gen::thumb_gen_cmd;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -100,7 +99,6 @@ pub fn run() {
             files_in_dirs_cmd::rescan_dir,
             config_cmd::get_config,
             config_cmd::set_config,
-            thumb_gen_cmd::generate_thumbnails
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
