@@ -18,8 +18,6 @@ use crate::{
 };
 
 const TILE_SIZE: u16 = 256;
-const ROWS: u8 = 4;
-const COLS: u8 = 4;
 
 /*
 cli commands would look like this:
@@ -32,21 +30,35 @@ ffmpeg -i in-d.mp4 -y -hide_banner -vf "fps=2,scale=256:256,tile=4x4" -frames:v 
 Animated thumbnail:
 ffmpeg -i in-d.mp4 -y -hide_banner -vf "fps=3,scale=256:256,setpts=PTS/6" -an -crf 50 out.webm
 */
+const MIN_TILES: u8 = 9;
+const MAX_TILES: u8 = 36;
+fn decide_grid_for_video(video_stats: &VideoStats) -> (u8, u8) {
+    let tiles_aprox = (video_stats.dur / 7.0).min(MAX_TILES as f64) as u8;
+
+    match tiles_aprox {
+        n if n < MIN_TILES => (3, 3), // Minimum grid size
+        n if n > MAX_TILES => (6, 6), // Maximum grid size
+        n => {
+            let cols = (n as f64).sqrt().ceil() as u8;
+            let rows = (n as f64 / cols as f64).ceil() as u8;
+            (cols, rows)
+        }
+    }
+}
 
 pub fn gen_ffmpeg_vid_tiled_thumb(
     file: &File,
     file_absolute_path: String,
     thumbnail_dir: &Path,
 ) -> Result<Thumbnail, String> {
-    println!("do_ffmpeg_stuff: {:?}", file.name);
-
     let input = file_absolute_path.clone();
     let output_name = thumbnail_dir.join("thumbnail.avif");
 
     let video_stats: VideoStats = analyze_video(PathBuf::from(&input))
         .map_err(|err| format!("Failed to analyze video: {}", err))?;
 
-    let fps = f64::from(ROWS * COLS) / video_stats.dur;
+    let (cols, rows) = decide_grid_for_video(&video_stats);
+    let fps = f64::from(cols * rows) / video_stats.dur;
 
     let mut binding = FfmpegCommand::new();
 
@@ -55,14 +67,14 @@ pub fn gen_ffmpeg_vid_tiled_thumb(
         fps = fps,
         w = TILE_SIZE,
         h = TILE_SIZE,
-        cols = COLS,
-        rows = ROWS
+        cols = cols,
+        rows = rows
     );
     let _command = binding
         .hide_banner()
         .overwrite()
         .input(input)
-        .args(["-vf", &vf_arg, "-crf", "45"])
+        .args(["-vf", &vf_arg, "-crf", "40"])
         .frames(1)
         .output(output_name.to_str().unwrap());
 
@@ -72,7 +84,7 @@ pub fn gen_ffmpeg_vid_tiled_thumb(
 
     Ok(Thumbnail {
         res: (TILE_SIZE, TILE_SIZE),
-        grid: Some((COLS, ROWS)),
+        grid: Some((cols, rows)),
     })
 }
 
@@ -80,8 +92,6 @@ pub fn gen_image_thumb(
     file_absolute_path: String,
     thumbnail_dir: &Path,
 ) -> Result<Thumbnail, String> {
-    println!("Generating image thumbnail for: {:?}", file_absolute_path);
-
     let img = ImageReader::open(file_absolute_path)
         .map_err(|_err| "Failed to open image")?
         .decode()
