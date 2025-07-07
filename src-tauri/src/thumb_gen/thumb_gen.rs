@@ -33,11 +33,11 @@ ffmpeg -i in-d.mp4 -y -hide_banner -vf "fps=3,scale=256:256,setpts=PTS/6" -an -c
 const MIN_TILES: u8 = 9;
 const MAX_TILES: u8 = 36;
 fn decide_grid_for_video(video_stats: &VideoStats) -> (u8, u8) {
-    let tiles_aprox = (video_stats.dur / 7.0).min(MAX_TILES as f64) as u8;
+    let tiles_aprox = (video_stats.dur / 5.0).min(MAX_TILES as f64) as u8;
 
     match tiles_aprox {
-        n if n < MIN_TILES => (3, 3), // Minimum grid size
-        n if n > MAX_TILES => (6, 6), // Maximum grid size
+        // n if n < MIN_TILES => (3, 3), // Minimum grid size
+        // n if n > MAX_TILES => (6, 6), // Maximum grid size
         n => {
             let cols = (n as f64).sqrt().ceil() as u8;
             let rows = (n as f64 / cols as f64).ceil() as u8;

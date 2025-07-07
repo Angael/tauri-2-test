@@ -1,4 +1,4 @@
-export interface Thumbnail {
+export interface ThumbnailType {
   res: [number, number];
   grid?: [number, number];
 }
@@ -8,7 +8,7 @@ export interface File {
   name: string;
   size: number;
 
-  thumbs: Thumbnail[];
+  thumbs: ThumbnailType[];
 }
 
 export interface DirWithFiles {

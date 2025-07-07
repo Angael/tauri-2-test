@@ -1,9 +1,9 @@
 import { useInViewport } from "@mantine/hooks";
-import { convertFileSrc } from "@tauri-apps/api/core";
-import { memo, useEffect, useRef } from "react";
+import { memo } from "react";
 import { DirWithFiles } from "../../saved-folders/FilesInDirs.type";
 import css from "./File.module.css";
 import FilePlaceholder from "./FilePlaceholder";
+import Thumbnail from "./Thumbnail";
 // import { listen } from "@tauri-apps/api/event";
 
 type Props = {
@@ -11,48 +11,48 @@ type Props = {
   file: DirWithFiles["files"][number];
 };
 
-const TILE_SIZE = 256; // px
-
 const File = ({ dir: _, file }: Props) => {
   const { ref, inViewport } = useInViewport();
 
-  const imgRef = useRef<HTMLImageElement>(null);
   const hasThumbnail = file.thumbs.length > 0;
 
-  useEffect(() => {
-    const thumbsWithGrid = file.thumbs.find((thumb) => thumb.grid);
-    if (!thumbsWithGrid || !thumbsWithGrid.grid) {
-      return;
-    }
+  // useEffect(() => {
+  //   const thumbsWithGrid = file.thumbs.find((thumb) => thumb.grid);
+  //   if (!thumbsWithGrid || !thumbsWithGrid.grid) {
+  //     return;
+  //   }
 
-    const [columns, rows] = thumbsWithGrid.grid;
-    const totalTiles = columns * rows;
-    
-    let intervalRef = null as any;
-    let currentTile = 0;
+  //   const [columns, rows] = thumbsWithGrid.grid;
+  //   const totalTiles = columns * rows;
 
-    const updateTilePosition = () => {
-      if (!imgRef.current) return;
+  //   let intervalRef = null as any;
+  //   let currentTile = 0;
 
-      const row = Math.floor(currentTile / columns);
-      const col = currentTile % columns;
+  //   const updateTilePosition = () => {
+  //     if (!imgRef.current) return;
 
-      const xOffset = -col * TILE_SIZE;
-      const yOffset = -row * TILE_SIZE;
+  //     const row = Math.floor(currentTile / columns);
+  //     const col = currentTile % columns;
 
-      imgRef.current.style.objectPosition = `${xOffset}px ${yOffset}px`;
+  //     const xOffset = -col * TILE_SIZE;
+  //     const yOffset = -row * TILE_SIZE;
 
-      currentTile = (currentTile + 1) % totalTiles;
-    };
+  //     imgRef.current.style.objectPosition = `${xOffset}px ${yOffset}px`;
 
-    intervalRef = setInterval(updateTilePosition, 150);
+  //     currentTile = (currentTile + 1) % totalTiles;
+  //   };
 
-    return () => {
-      if (intervalRef) {
-        clearInterval(intervalRef);
-      }
-    };
-  }, [file.thumbs]);
+  //   const exponentialTime = Math.min(Math.max(2000 / totalTiles, 100), 300); // Ensure a minimum interval
+  //   // Set the interval to update the tile position
+
+  //   intervalRef = setInterval(updateTilePosition, exponentialTime);
+
+  //   return () => {
+  //     if (intervalRef) {
+  //       clearInterval(intervalRef);
+  //     }
+  //   };
+  // }, [file.thumbs]);
 
   // const src = useMemo(() => {
   //   // TODO: works only on Windows, and bad performance?
@@ -81,12 +81,9 @@ const File = ({ dir: _, file }: Props) => {
   // }, []);
 
   // TODO: Remove hardcoded path
-  const src = convertFileSrc(
-    `C:\\Users\\krzys\\AppData\\Local\\com.tauri-2-test.app\\files\\${file.id}\\thumbnail.avif`
-  );
 
   const content = hasThumbnail ? (
-    <img ref={imgRef} className={css.thumbnail} src={src} alt={file.name} />
+    <Thumbnail file={file} />
   ) : (
     <FilePlaceholder file={file} />
   );

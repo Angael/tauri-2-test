@@ -7,8 +7,6 @@ import { DirWithFiles } from "../saved-folders/FilesInDirs.type";
 import File from "./file/File";
 import css from "./ViewerDir.module.css";
 
-// import { join } from "@tauri-apps/api/path";
-
 const ViewerDir = () => {
   const params = useParams();
 
