@@ -5,7 +5,6 @@ import {
   ThumbnailType
 } from "../../saved-folders/FilesInDirs.type";
 import { memo, useCallback, useRef } from "react";
-import { useCursorSeekThumbnail } from "./useCursorSeekThumbnail";
 
 const getTilePos = (thumb: ThumbnailType, i: number): [number, number] => {
   const { grid, res } = thumb;

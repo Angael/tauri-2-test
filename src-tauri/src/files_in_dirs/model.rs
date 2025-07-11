@@ -123,7 +123,7 @@ impl FilesInDirs {
             *dir_with_files = DirWithFiles::new(dir, state)?;
             Ok(())
         } else {
-            Err(format!("Directory '{}' not found", dir))
+            self.add_dir(dir.clone(), state)
         }
     }
 }

@@ -64,6 +64,8 @@ pub fn remove_dir(dir: String, state: tauri::State<AppState>) -> Result<(), Stri
 pub fn rescan_dir(dir: String, state: tauri::State<AppState>) -> Result<(), String> {
     println!("rescan_dir: {:?}", dir);
 
+    remove_dir(dir.clone(), state.clone())?;
+
     state
         .files_in_dirs
         .with_mut(|files_in_dirs| files_in_dirs.rescan_dir(&dir, &state))?
