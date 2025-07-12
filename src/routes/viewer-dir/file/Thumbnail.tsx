@@ -15,7 +15,7 @@ const getTilePos = (thumb: ThumbnailType, i: number): [number, number] => {
     return [0, 0];
   }
 
-  const [columns, rows] = grid;
+  const [columns, _rows] = grid;
   const [tileWidth, tileHeight] = res;
 
   const row = Math.floor(i / columns);

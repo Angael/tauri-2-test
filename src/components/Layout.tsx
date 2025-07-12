@@ -40,11 +40,12 @@ const Layout = ({ children, containerProps }: Props) => {
           style={{ textDecoration: "none" }}
           active={isStillViewer}
         />
+        <MantineNavLink component={NavLink} to="/config" label="Config" />
         <MantineNavLink
+          color="red"
           component={NavLink}
-          to="/config"
-          label="Config"
-          // style={{ textDecoration: "none" }}
+          to="/debug"
+          label="Debug"
         />
       </AppShell.Navbar>
       <AppShell.Main>
