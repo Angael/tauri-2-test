@@ -4,7 +4,10 @@ import {
   DirWithFiles,
   ThumbnailType
 } from "../../saved-folders/FilesInDirs.type";
-import { memo, useCallback, useRef } from "react";
+import { memo, use, useCallback, useRef } from "react";
+import { path } from "@tauri-apps/api";
+
+const cacheDirPromise = path.appCacheDir();
 
 const getTilePos = (thumb: ThumbnailType, i: number): [number, number] => {
   const { grid, res } = thumb;
@@ -37,6 +40,7 @@ const Thumbnail = ({ file }: Props) => {
   // Is the thumbnail grid animating on it's own on interval?
   const playing = useRef(true);
   const thumbWithGrid = file.thumbs.find((thumb) => thumb.grid);
+  const cacheDir = use(cacheDirPromise);
 
   const imgRef = useCallback(
     (node: HTMLImageElement | null) => {
@@ -44,28 +48,28 @@ const Thumbnail = ({ file }: Props) => {
       const abortControler = new AbortController();
       const tileCount = thumbWithGrid.grid![0] * thumbWithGrid.grid![1];
 
+      let index = 1;
       const handleMouseMove = (event: MouseEvent) => {
         playing.current = false; // Stop the interval when mouse moves
 
         const { left, width } = node.getBoundingClientRect();
         const percentageX = (event.clientX - left) / width;
 
-        const tileIndex = getTileIndex(percentageX, tileCount);
-        const [x, y] = getTilePos(thumbWithGrid, tileIndex);
+        index = getTileIndex(percentageX, tileCount);
+        const [x, y] = getTilePos(thumbWithGrid, index);
 
-        console.log("a", { percentageX, tileIndex, x, y });
+        console.log("a", { percentageX, index, x, y });
 
         node.style.objectPosition = `${x}px ${y}px`;
       };
 
       const interval = setInterval(() => {
         if (!playing.current) return;
-        const percentage = (Date.now() % 5000) / 5000; // Cycle every 5 seconds
-        const tileIndex = getTileIndex(percentage, tileCount);
-        const [x, y] = getTilePos(thumbWithGrid, tileIndex);
-        console.log("b", { percentage, tileIndex, x, y });
+        const [x, y] = getTilePos(thumbWithGrid, index);
         node.style.objectPosition = `${x}px ${y}px`;
-      }, 50);
+
+        index = (index + 1) % tileCount;
+      }, 500);
 
       node.addEventListener("mousemove", handleMouseMove, {
         signal: abortControler.signal
@@ -86,9 +90,7 @@ const Thumbnail = ({ file }: Props) => {
   );
   // useCursorSeekThumbnail(file.thumbs[0], imgRef);
 
-  const src = convertFileSrc(
-    `C:\\Users\\krzys\\AppData\\Local\\com.tauri-2-test.app\\files\\${file.id}\\thumbnail.avif`
-  );
+  const src = convertFileSrc(`${cacheDir}\\files\\${file.id}\\thumbnail.avif`);
 
   return (
     <img ref={imgRef} className={css.thumbnail} src={src} alt={file.name} />

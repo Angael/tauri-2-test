@@ -38,8 +38,6 @@ fn decide_grid_for_video(video_stats: &VideoStats) -> (u8, u8) {
         .max(MIN_TILES as f64) as u8;
 
     match tiles_aprox {
-        // n if n < MIN_TILES => (3, 3), // Minimum grid size
-        // n if n > MAX_TILES => (6, 6), // Maximum grid size
         n => {
             let cols = (n as f64).sqrt().ceil() as u8;
             let rows = (n as f64 / cols as f64).ceil() as u8;
