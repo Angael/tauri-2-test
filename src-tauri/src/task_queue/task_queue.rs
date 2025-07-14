@@ -55,8 +55,14 @@ impl ThreadSafeEventQueue {
             queue = cvar.wait(queue).unwrap();
         }
 
-        // At this point, the queue is guaranteed to not be empty.
-        queue.pop_front().unwrap()
+        drop(queue); // Drop the lock before locking with with_mut
+
+        self.inner
+            .with_mut(|q| {
+                // This will block until an event is available.
+                q.pop_front().unwrap()
+            })
+            .unwrap()
     }
 
     pub fn len(&self) -> usize {
@@ -65,6 +71,10 @@ impl ThreadSafeEventQueue {
 
     pub fn is_empty(&self) -> bool {
         return self.inner.with(|queue| queue.is_empty());
+    }
+
+    pub fn force_save_blocking(&self) -> Result<(), String> {
+        self.inner.force_save_blocking()
     }
 }
 

@@ -50,7 +50,7 @@ pub fn run() {
             let window_clone = window.clone();
             let app_config_clone = app_config.clone();
             let files_in_dirs_clone = files_in_dirs.clone();
-            
+            let event_queue_clone = event_queue.clone();
             window.on_window_event(move |event| {
                 if let WindowEvent::CloseRequested { .. } = event {
                     // Perform blocking saves to ensure data persistence before shutdown
@@ -58,6 +58,9 @@ pub fn run() {
                         eprintln!("Failed to save app config on shutdown: {}", e);
                     }
                     if let Err(e) = files_in_dirs_clone.force_save_blocking() {
+                        eprintln!("Failed to save files_in_dirs on shutdown: {}", e);
+                    }
+                    if let Err(e) = event_queue_clone.force_save_blocking() {
                         eprintln!("Failed to save files_in_dirs on shutdown: {}", e);
                     }
                     
