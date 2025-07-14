@@ -3,7 +3,7 @@ use serde::{de::DeserializeOwned, Serialize};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::mpsc::{self, Receiver, Sender};
-use std::sync::{Arc, RwLock};
+use std::sync::{Arc, Mutex, RwLock};
 use std::thread;
 use std::time::{Duration, Instant};
 
@@ -13,7 +13,7 @@ where
     T: Serialize + DeserializeOwned + Default + Send + Sync + 'static,
 {
     path: PathBuf,
-    state: Arc<RwLock<T>>,
+    state: Arc<Mutex<T>>,
     save_trigger: Sender<SaveRequest>,
 }
 
@@ -49,7 +49,7 @@ where
             T::default()
         };
 
-        let state = Arc::new(RwLock::new(state));
+        let state = Arc::new(Mutex::new(state));
         let (tx, rx) = mpsc::channel();
 
         // Start background save thread
@@ -75,7 +75,7 @@ where
                 .map_err(|e| format!("Failed to create directory: {}", e))?;
         }
 
-        let state_guard = self.state.read().map_err(|e| e.to_string())?;
+        let state_guard = self.state.lock().map_err(|e| e.to_string())?;
         let data = serde_json::to_string_pretty(&*state_guard)
             .map_err(|e| format!("Failed to serialize state: {}", e))?; // Save in both JSON (human-readable) and MessagePack (efficient) formats
         let msgpack_data = rmp_serde::to_vec(&*state_guard)
@@ -95,7 +95,7 @@ where
     where
         F: FnOnce(&T) -> R,
     {
-        let state_guard = self.state.read().unwrap();
+        let state_guard = self.state.lock().unwrap();
         f(&*state_guard)
     }
     /// Provides safe, mutable access to the state via a closure.
@@ -107,7 +107,7 @@ where
         F: FnOnce(&mut T) -> R,
     {
         let result = {
-            let mut state_guard = self.state.write().unwrap();
+            let mut state_guard = self.state.lock().unwrap();
             f(&mut *state_guard)
         };
 
@@ -136,6 +136,11 @@ where
     pub fn force_save_blocking(&self) -> Result<(), String> {
         Self::save_state_to_disk(&self.state, &self.path)
     }
+
+    pub fn raw_state(&self) -> &Arc<Mutex<T>> {
+        &self.state
+    }
+
     /// Background thread that handles debounced and safety saves.
     ///
     /// Features:
@@ -143,7 +148,7 @@ where
     /// - Safety saves: Automatically saves every 15s regardless of activity
     /// - Force saves: Processes immediate save requests (e.g., on shutdown)
     /// - Efficient batching: Multiple rapid changes result in single save operation
-    fn background_save_loop(receiver: Receiver<SaveRequest>, state: Arc<RwLock<T>>, path: PathBuf) {
+    fn background_save_loop(receiver: Receiver<SaveRequest>, state: Arc<Mutex<T>>, path: PathBuf) {
         let debounce_duration = Duration::from_millis(1500); // 1.5 second debounce
         let safety_save_interval = Duration::from_secs(15); // Safety save every 15 seconds
 
@@ -193,13 +198,13 @@ where
     }
     /// Internal method to save state to disk in both JSON and MessagePack formats.
     /// Used by both the background save thread and the legacy synchronous save method.
-    fn save_state_to_disk(state: &Arc<RwLock<T>>, path: &Path) -> Result<(), String> {
+    fn save_state_to_disk(state: &Arc<Mutex<T>>, path: &Path) -> Result<(), String> {
         if let Some(parent_dir) = path.parent() {
             fs::create_dir_all(parent_dir)
                 .map_err(|e| format!("Failed to create directory: {}", e))?;
         }
 
-        let state_guard = state.read().map_err(|e| e.to_string())?;
+        let state_guard = state.lock().map_err(|e| e.to_string())?;
         let data = serde_json::to_string_pretty(&*state_guard)
             .map_err(|e| format!("Failed to serialize state: {}", e))?;
 

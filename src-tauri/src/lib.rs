@@ -42,18 +42,7 @@ pub fn run() {
                 todo!("FFmpeg is not installed. Please install it manually or use `auto_download()` to download it automatically.");
             }
 
-            let event_queue = ThreadSafeEventQueue::new();
-
-            // Start multiple consumers for load balancing
-            // TODO: Experiment with number of consumers
-            for _ in 0..3 {
-                let queue_for_consumer = event_queue.clone();
-                let app_handle_clone = app_handle.clone();
-                std::thread::spawn(move || {
-                    start_event_consumer(queue_for_consumer, app_handle_clone);
-                });
-            }            
-            
+            let event_queue = ThreadSafeEventQueue::new(app_data_dir.join("task_queue"));        
             let app_config = JsonState::load(app_data_dir.join("app_config"));
             let files_in_dirs = JsonState::load(app_data_dir.join("files_in_dirs"));
 
@@ -79,10 +68,19 @@ pub fn run() {
             
             app.manage(AppState {
                 thumbnail_store: ThumbnailStore::new(&app_handle),
-                event_queue,
+                event_queue: event_queue.clone(),
                 app_config,
                 files_in_dirs,
             }); // Make AppState available to commands
+
+            // TODO: Experiment with number of queue consumers for load balancing
+            for _ in 0..3 {
+                let queue_for_consumer = event_queue.clone();
+                let app_handle_clone = app_handle.clone();
+                std::thread::spawn(move || {
+                    start_event_consumer(queue_for_consumer, app_handle_clone);
+                });
+            }     
 
             #[cfg(debug_assertions)] // only in debug builds
             {

@@ -74,7 +74,7 @@ pub fn handle_task_generate_thumb(task: GenerateThumbTask, app_handle: &tauri::A
         .to_string();
 
     let thumb = match file_type {
-        FileType::Video => gen_ffmpeg_vid_tiled_thumb(&file, input_path_str, &thumbnail_dir),
+        FileType::Video => gen_ffmpeg_vid_tiled_thumb(input_path_str, &thumbnail_dir),
         FileType::Image => gen_image_thumb(input_path_str, &thumbnail_dir),
         _ => Err("Unsupported file type".to_string()),
     };

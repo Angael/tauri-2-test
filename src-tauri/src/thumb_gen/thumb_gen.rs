@@ -12,7 +12,6 @@ use image::{imageops::FilterType, ImageFormat, ImageReader};
 use std::path::{Path, PathBuf};
 
 use crate::{
-    files_in_dirs::file::File,
     thumb_gen::thumbnail::Thumbnail,
     video::analyze::{analyze_video, VideoStats},
 };
@@ -47,7 +46,6 @@ fn decide_grid_for_video(video_stats: &VideoStats) -> (u8, u8) {
 }
 
 pub fn gen_ffmpeg_vid_tiled_thumb(
-    file: &File,
     file_absolute_path: String,
     thumbnail_dir: &Path,
 ) -> Result<Thumbnail, String> {
