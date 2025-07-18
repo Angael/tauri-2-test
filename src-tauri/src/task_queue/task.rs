@@ -6,6 +6,7 @@ pub struct GenerateThumbTask {
     pub i: u32,
     /** The total number of files in the directory */
     pub total: u32,
+    pub started: bool, // true if the task has started processing
 }
 
 // Define different event types (must be Send + Sync + 'static)
