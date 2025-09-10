@@ -53,6 +53,7 @@ impl DirWithFiles {
             state
                 .event_queue
                 .enqueue(Task::GenerateThumb(GenerateThumbTask {
+                    started: false,
                     dir: dir_clone.clone(),
                     id: file.id.clone(),
                     i: i as u32,
