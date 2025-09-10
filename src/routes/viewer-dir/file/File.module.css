@@ -27,3 +27,34 @@
     filter: brightness(0.8) saturate(1.2);
   }
 }
+
+.thumbnailWrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+
+  &:hover .progressBarTrack {
+    height: 12px;
+  }
+}
+
+.progressBarTrack {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 6px;
+  background: color-mix(in oklab, var(--mantine-color-dark-7) 70%, transparent);
+  border-top: 1px solid color-mix(in oklab, black 15%, transparent);
+  overflow: hidden;
+  pointer-events: none;
+  transition: height 100ms linear;
+}
+
+.progressBarFill {
+  height: 100%;
+  width: 100%;
+  transform-origin: left center;
+  transform: scaleX(0);
+  background: var(--mantine-primary-color-filled);
+}

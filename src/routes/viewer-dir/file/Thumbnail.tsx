@@ -29,7 +29,7 @@ const getTilePos = (thumb: ThumbnailType, i: number): [number, number] => {
 
 const getTileIndex = (percentage: number, tileCount: number) => {
   const index = Math.floor(percentage * tileCount);
-  return index < 0 ? 0 : index;
+  return Math.max(0, Math.min(tileCount - 1, index));
 };
 
 type Props = {
@@ -41,6 +41,7 @@ const Thumbnail = ({ file }: Props) => {
   const playing = useRef(true);
   const thumbWithGrid = file.thumbs.find((thumb) => thumb.grid);
   const cacheDir = use(cacheDirPromise);
+  const progressRef = useRef<HTMLDivElement | null>(null);
 
   const imgRef = useCallback(
     (node: HTMLImageElement | null) => {
@@ -49,6 +50,12 @@ const Thumbnail = ({ file }: Props) => {
       const tileCount = thumbWithGrid.grid![0] * thumbWithGrid.grid![1];
 
       let index = 1;
+      const updateProgress = () => {
+        if (!progressRef.current) return;
+        const ratio = Math.min(1, Math.max(0, (index + 1) / tileCount));
+        progressRef.current.style.transform = `scaleX(${ratio})`;
+      };
+
       const handleMouseMove = (event: MouseEvent) => {
         playing.current = false; // Stop the interval when mouse moves
 
@@ -59,6 +66,7 @@ const Thumbnail = ({ file }: Props) => {
         const [x, y] = getTilePos(thumbWithGrid, index);
 
         node.style.objectPosition = `${x}px ${y}px`;
+        updateProgress();
       };
 
       const interval = setInterval(() => {
@@ -67,6 +75,7 @@ const Thumbnail = ({ file }: Props) => {
         node.style.objectPosition = `${x}px ${y}px`;
 
         index = (index + 1) % tileCount;
+        updateProgress();
       }, 500);
 
       node.addEventListener("mousemove", handleMouseMove, {
@@ -79,6 +88,8 @@ const Thumbnail = ({ file }: Props) => {
         },
         { signal: abortControler.signal }
       );
+
+      updateProgress();
       return () => {
         abortControler.abort();
         clearInterval(interval);
@@ -91,13 +102,20 @@ const Thumbnail = ({ file }: Props) => {
   const src = convertFileSrc(`${cacheDir}\\files\\${file.id}\\thumbnail.avif`);
 
   return (
-    <img
-      ref={imgRef}
-      className={css.thumbnail}
-      src={src}
-      alt={file.name}
-      draggable="false"
-    />
+    <div className={css.thumbnailWrapper}>
+      <img
+        ref={imgRef}
+        className={css.thumbnail}
+        src={src}
+        alt={file.name}
+        draggable="false"
+      />
+      {thumbWithGrid?.grid ? (
+        <div className={css.progressBarTrack}>
+          <div ref={progressRef} className={css.progressBarFill} />
+        </div>
+      ) : null}
+    </div>
   );
 };
 
