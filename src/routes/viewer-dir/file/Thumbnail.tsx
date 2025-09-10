@@ -7,7 +7,7 @@ import {
 import { memo, use, useCallback, useRef } from "react";
 import { path } from "@tauri-apps/api";
 
-const cacheDirPromise = path.appCacheDir();
+export const cacheDirPromise = path.appCacheDir();
 
 const getTilePos = (thumb: ThumbnailType, i: number): [number, number] => {
   const { grid, res } = thumb;
@@ -58,8 +58,6 @@ const Thumbnail = ({ file }: Props) => {
         index = getTileIndex(percentageX, tileCount);
         const [x, y] = getTilePos(thumbWithGrid, index);
 
-        console.log("a", { percentageX, index, x, y });
-
         node.style.objectPosition = `${x}px ${y}px`;
       };
 
@@ -93,7 +91,13 @@ const Thumbnail = ({ file }: Props) => {
   const src = convertFileSrc(`${cacheDir}\\files\\${file.id}\\thumbnail.avif`);
 
   return (
-    <img ref={imgRef} className={css.thumbnail} src={src} alt={file.name} />
+    <img
+      ref={imgRef}
+      className={css.thumbnail}
+      src={src}
+      alt={file.name}
+      draggable="false"
+    />
   );
 };
 

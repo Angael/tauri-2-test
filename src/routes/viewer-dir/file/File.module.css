@@ -3,6 +3,16 @@
   border-radius: var(--mantine-radius-default);
 
   overflow: hidden;
+
+  /* disable mouse drag */
+  user-select: none;
+
+  /* transition: outline 50ms ease; */
+  outline: solid 2px transparent;
+  &:hover {
+    outline: solid 4px var(--mantine-primary-color-filled-hover);
+    border: 1px solid white;
+  }
 }
 
 .thumbnail {
@@ -10,4 +20,10 @@
   height: 100%;
   object-fit: none;
   object-position: 0 0;
+
+  /* transition: filter 50ms ease, rotate 50ms ease; */
+
+  &:hover {
+    filter: brightness(0.8) saturate(1.2);
+  }
 }

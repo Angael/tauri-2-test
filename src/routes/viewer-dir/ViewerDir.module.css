@@ -1,8 +1,11 @@
 .grid {
+  flex: 1;
   display: grid;
+  justify-content: center;
+
   /* // This is bad for tiled thumbnails for now
   // grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); */
   grid-template-columns: repeat(auto-fill, 256px);
-  grid-auto-rows: minmax(256px, auto);
+  grid-auto-rows: 256px;
   gap: 16px;
 }

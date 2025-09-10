@@ -1,0 +1,11 @@
+.filePreview {
+  width: 500px;
+  height: calc(100vh - 92px);
+  outline: solid 2px red;
+
+  background: white;
+
+  display: block;
+  position: sticky;
+  top: 76px;
+}

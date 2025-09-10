@@ -1,10 +1,8 @@
 import {
   AppShell,
-  Group,
   Burger,
-  NavLink as MantineNavLink,
-  Container,
-  Stack
+  Group,
+  NavLink as MantineNavLink
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { NavLink, useLocation } from "react-router";
