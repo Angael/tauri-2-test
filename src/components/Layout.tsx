@@ -11,11 +11,10 @@ import { NavLink, useLocation } from "react-router";
 
 type Props = {
   children?: React.ReactNode;
-  containerProps?: React.ComponentProps<typeof Container>;
 };
 
-const Layout = ({ children, containerProps }: Props) => {
-  const [opened, { toggle }] = useDisclosure();
+const Layout = ({ children }: Props) => {
+  const [opened, { toggle }] = useDisclosure(false);
   const location = useLocation();
 
   const isStillViewer = location.pathname.startsWith("/viewer-dir");
@@ -23,13 +22,19 @@ const Layout = ({ children, containerProps }: Props) => {
   return (
     <AppShell
       header={{ height: 60 }}
-      navbar={{ width: 300, breakpoint: "sm", collapsed: { mobile: !opened } }}
+      navbar={{
+        width: 300,
+        breakpoint: "sm",
+        collapsed: { mobile: !opened, desktop: !opened }
+      }}
       padding="md"
     >
       <AppShell.Header>
         <Group h="100%" px="md">
-          <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-          <div style={{ fontWeight: "bold", fontSize: "1.2rem" }}>My App</div>
+          <Burger opened={opened} onClick={toggle} size="sm" />
+          <div style={{ fontWeight: "bold", fontSize: "1.2rem" }}>
+            Camille 2
+          </div>
         </Group>
       </AppShell.Header>
       <AppShell.Navbar p="md">
@@ -48,11 +53,7 @@ const Layout = ({ children, containerProps }: Props) => {
           label="Debug"
         />
       </AppShell.Navbar>
-      <AppShell.Main>
-        <Container {...containerProps}>
-          <Stack>{children}</Stack>
-        </Container>
-      </AppShell.Main>
+      <AppShell.Main>{children}</AppShell.Main>
     </AppShell>
   );
 };

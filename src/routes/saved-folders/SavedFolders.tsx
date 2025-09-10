@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
-import Layout from "../../components/Layout";
+import StackContainer from "../../components/StackContainer";
 import AddSavedFolder from "./AddSavedFolder";
 import SavedFolder from "./SavedFolder";
 import { useDirs } from "./useDirs";
@@ -17,7 +17,7 @@ const SavedDirs = () => {
   });
 
   return (
-    <Layout>
+    <StackContainer>
       <AddSavedFolder
         onAddFolder={addFolderMut.mutate}
         isPending={addFolderMut.isPending}
@@ -25,7 +25,7 @@ const SavedDirs = () => {
       {dirsQuery.data?.dirs.map((dir) => (
         <SavedFolder key={dir.path} dir={dir} />
       ))}
-    </Layout>
+    </StackContainer>
   );
 };
 

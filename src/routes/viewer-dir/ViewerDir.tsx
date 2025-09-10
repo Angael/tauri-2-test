@@ -1,11 +1,11 @@
-import { LoadingOverlay, Stack, Title } from "@mantine/core";
+import { Container, LoadingOverlay, Stack, Title } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
 import { useParams } from "react-router";
-import Layout from "../../components/Layout";
 import { DirWithFiles } from "../saved-folders/FilesInDirs.type";
 import File from "./file/File";
 import css from "./ViewerDir.module.css";
+import StackContainer from "../../components/StackContainer";
 
 const ViewerDir = () => {
   const params = useParams();
@@ -17,7 +17,7 @@ const ViewerDir = () => {
   });
 
   return (
-    <Layout containerProps={{ size: "100%" }}>
+    <StackContainer size="100%">
       <Title order={2}>{params.dirPath}</Title>
       <Stack pos="relative">
         <LoadingOverlay visible={dirQuery.isLoading} />
@@ -27,7 +27,7 @@ const ViewerDir = () => {
           ))}
         </div>
       </Stack>
-    </Layout>
+    </StackContainer>
   );
 };
 

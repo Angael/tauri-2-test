@@ -1,8 +1,8 @@
-import { Button, TextInput } from "@mantine/core";
+import { Button, Container, TextInput } from "@mantine/core";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
-import Layout from "../../components/Layout";
+import StackContainer from "../../components/StackContainer";
 
 interface ConfigData {
   ffmpeg_path: string;
@@ -59,7 +59,7 @@ const Config = () => {
     ffprobePath !== configQuery.data?.ffprobe_path;
 
   return (
-    <Layout>
+    <StackContainer>
       <TextInput
         label="Path to ffmpeg"
         placeholder="I:\FFmpeg\bin\ffmpeg.exe"
@@ -79,7 +79,7 @@ const Config = () => {
       >
         Save Config
       </Button>
-    </Layout>
+    </StackContainer>
   );
 };
 

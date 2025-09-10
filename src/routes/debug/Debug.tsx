@@ -1,8 +1,8 @@
-import { path } from "@tauri-apps/api";
-import Layout from "../../components/Layout";
-import { use } from "react";
 import { Code, Stack, Title } from "@mantine/core";
+import { path } from "@tauri-apps/api";
+import { use } from "react";
 import { useDirs } from "../saved-folders/useDirs";
+import StackContainer from "../../components/StackContainer";
 
 const cacheDirPromise = path.appCacheDir();
 const dataDirPromise = path.appDataDir();
@@ -13,7 +13,7 @@ const Debug = () => {
   const dataDir = use(dataDirPromise);
 
   return (
-    <Layout>
+    <StackContainer>
       <Stack>
         <Title order={1}>Debug</Title>
         <p>Cache directory:</p>
@@ -25,7 +25,7 @@ const Debug = () => {
         <Title order={2}>State</Title>
         <Code block>{JSON.stringify(dirsQuery.data, null, 2)}</Code>
       </Stack>
-    </Layout>
+    </StackContainer>
   );
 };
 
