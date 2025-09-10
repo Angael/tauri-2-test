@@ -1,14 +1,14 @@
-import { Group, LoadingOverlay, Stack, Title } from "@mantine/core";
+import { Group, LoadingOverlay, Title } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
 import { useParams } from "react-router";
+import { useStore } from "zustand";
 import StackContainer from "../../components/StackContainer";
+import { $currentPreview } from "../../stores/current_preview";
 import { DirWithFiles } from "../saved-folders/FilesInDirs.type";
+import FilePreview from "./file-preview/FilePreview";
 import File from "./file/File";
 import css from "./ViewerDir.module.css";
-import { useStore } from "zustand";
-import { $currentPreview } from "../../stores/current_preview";
-import FilePreview from "./file-preview/FilePreview";
 
 const ViewerDir = () => {
   const params = useParams();
