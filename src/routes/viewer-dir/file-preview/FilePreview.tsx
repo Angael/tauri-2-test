@@ -8,25 +8,37 @@ import { convertFileSrc } from "@tauri-apps/api/core";
 const cacheDirPromise = path.appCacheDir();
 
 type Props = {
+  dirPath: string;
   file: DirWithFiles["files"][number] | null;
   onClose: () => void;
 };
 
-const FilePreview = ({ file, onClose }: Props) => {
+const FilePreview = ({ dirPath, file, onClose }: Props) => {
   const cacheDir = use(cacheDirPromise);
-  const src = convertFileSrc(`${cacheDir}\\files\\${file?.id}\\thumbnail.avif`);
+
+  const thumbSrc = convertFileSrc(
+    `${cacheDir}\\files\\${file?.id}\\thumbnail.avif`
+  );
+  const src = convertFileSrc(dirPath + "\\" + file?.name);
 
   return (
     <div className={css.filePreview}>
-      <Stack>
-        <Button onClick={onClose}>Close</Button>
+      {/* <Stack> */}
+      <Button className={css.closeBtn} onClick={onClose}>
+        Close
+      </Button>
 
-        <img alt={file?.name} src={src} />
+      <img
+        className={css.image}
+        alt={file?.name}
+        src={src}
+        style={{ backgroundImage: `url(${thumbSrc})` }}
+      />
 
-        <Text>{file?.name}</Text>
+      <Text>{file?.name}</Text>
 
-        <pre>{JSON.stringify(file, null, 2)}</pre>
-      </Stack>
+      <pre>{JSON.stringify(file, null, 2)}</pre>
+      {/* </Stack> */}
     </div>
   );
 };

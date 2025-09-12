@@ -35,6 +35,7 @@ const ViewerDir = () => {
         </div>
         {previewFile && (
           <FilePreview
+            dirPath={params.dirPath!}
             file={previewFile}
             onClose={() => setPreviewFile(null)}
           />
