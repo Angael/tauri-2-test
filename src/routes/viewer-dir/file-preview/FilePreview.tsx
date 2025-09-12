@@ -1,11 +1,7 @@
-import { Button, Stack, Text } from "@mantine/core";
+import { Button } from "@mantine/core";
 import { DirWithFiles } from "../../saved-folders/FilesInDirs.type";
 import css from "./FilePreview.module.css";
-import { path } from "@tauri-apps/api";
-import { use } from "react";
 import { convertFileSrc } from "@tauri-apps/api/core";
-
-const cacheDirPromise = path.appCacheDir();
 
 type Props = {
   dirPath: string;
@@ -14,31 +10,26 @@ type Props = {
 };
 
 const FilePreview = ({ dirPath, file, onClose }: Props) => {
-  const cacheDir = use(cacheDirPromise);
-
-  const thumbSrc = convertFileSrc(
-    `${cacheDir}\\files\\${file?.id}\\thumbnail.avif`
-  );
   const src = convertFileSrc(dirPath + "\\" + file?.name);
+
+  const isVideo = file?.name.match(/\.(mp4|mov|avi|mkv|webm)$/i);
 
   return (
     <div className={css.filePreview}>
-      {/* <Stack> */}
       <Button className={css.closeBtn} onClick={onClose}>
         Close
       </Button>
 
-      <img
-        className={css.image}
-        alt={file?.name}
-        src={src}
-        style={{ backgroundImage: `url(${thumbSrc})` }}
-      />
+      {isVideo ? (
+        <video className={css.image} controls src={src} muted autoPlay />
+      ) : (
+        <img className={css.image} alt={file?.name} src={src} />
+      )}
 
-      <Text>{file?.name}</Text>
-
-      <pre>{JSON.stringify(file, null, 2)}</pre>
-      {/* </Stack> */}
+      <details className={css.debug}>
+        <summary>{file?.name} (JSON)</summary>
+        <pre>{JSON.stringify(file, null, 2)}</pre>
+      </details>
     </div>
   );
 };
