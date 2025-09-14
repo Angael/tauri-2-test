@@ -2,6 +2,7 @@ import { Button } from "@mantine/core";
 import { DirWithFiles } from "../../saved-folders/FilesInDirs.type";
 import css from "./FilePreview.module.css";
 import { convertFileSrc } from "@tauri-apps/api/core";
+import { env } from "../../../util/env";
 
 type Props = {
   dirPath: string;
@@ -26,10 +27,12 @@ const FilePreview = ({ dirPath, file, onClose }: Props) => {
         <img className={css.image} alt={file?.name} src={src} />
       )}
 
-      <details className={css.debug}>
-        <summary>{file?.name} (JSON)</summary>
-        <pre>{JSON.stringify(file, null, 2)}</pre>
-      </details>
+      {!env.isProd && (
+        <details className={css.debug}>
+          <summary>{file?.name} (JSON)</summary>
+          <pre>{JSON.stringify(file, null, 2)}</pre>
+        </details>
+      )}
     </div>
   );
 };
