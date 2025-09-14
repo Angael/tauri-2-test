@@ -1,30 +1,46 @@
 import { Button } from "@mantine/core";
-import { DirWithFiles } from "../../saved-folders/FilesInDirs.type";
-import css from "./FilePreview.module.css";
 import { convertFileSrc } from "@tauri-apps/api/core";
+import { ComponentPropsWithRef, memo } from "react";
+import { useStore } from "zustand";
+import { currentPreview$ } from "../../../stores/currentPreview$";
 import { env } from "../../../util/env";
+import css from "./FilePreview.module.css";
 
 type Props = {
   dirPath: string;
-  file: DirWithFiles["files"][number] | null;
-  onClose: () => void;
-};
+} & ComponentPropsWithRef<"div">;
 
-const FilePreview = ({ dirPath, file, onClose }: Props) => {
+const FilePreview = ({ dirPath, ...props }: Props) => {
+  const file = useStore(currentPreview$, (s) => s.file);
   const src = convertFileSrc(dirPath + "\\" + file?.name);
+  const onClose = useStore(currentPreview$, (s) => s.close);
 
   const isVideo = file?.name.match(/\.(mp4|mov|avi|mkv|webm)$/i);
 
+  console.log("rerender", { dirPath, fileid: file?.id, src, isVideo });
+
   return (
-    <div className={css.filePreview}>
+    <div className={css.filePreview} {...props}>
       <Button className={css.closeBtn} onClick={onClose}>
         Close
       </Button>
 
-      {isVideo ? (
-        <video className={css.image} controls src={src} muted autoPlay />
-      ) : (
-        <img className={css.image} alt={file?.name} src={src} />
+      {file && (
+        <>
+          {isVideo ? (
+            <video
+              key={file.id ?? "nofile"}
+              className={css.image}
+              controls
+              src={src}
+              muted
+              autoPlay
+              loop
+            />
+          ) : (
+            <img className={css.image} alt={file.name} src={src} />
+          )}
+        </>
       )}
 
       {!env.isProd && (
@@ -37,4 +53,4 @@ const FilePreview = ({ dirPath, file, onClose }: Props) => {
   );
 };
 
-export default FilePreview;
+export default memo(FilePreview);

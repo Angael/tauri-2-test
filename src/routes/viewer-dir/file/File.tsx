@@ -5,7 +5,7 @@ import css from "./File.module.css";
 import FilePlaceholder from "./FilePlaceholder";
 import Thumbnail from "./Thumbnail";
 import { useStore } from "zustand";
-import { $currentPreview } from "../../../stores/current_preview";
+import { currentPreview$ } from "../../../stores/currentPreview$";
 
 type Props = {
   dir: string;
@@ -14,7 +14,7 @@ type Props = {
 
 const File = ({ dir: _, file }: Props) => {
   const { ref, inViewport } = useInViewport();
-  const setPreviewitem = useStore($currentPreview, (s) => s.set);
+  const setPreviewitem = useStore(currentPreview$, (s) => s.set);
 
   const content =
     file.thumbs.length > 0 ? (
