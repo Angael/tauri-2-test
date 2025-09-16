@@ -51,7 +51,8 @@ const Layout = ({ children }: Props) => {
           label="Debug"
         />
       </AppShell.Navbar>
-      <AppShell.Main>{children}</AppShell.Main>
+
+      <AppShell.Main style={{ overflowX: "clip" }}>{children}</AppShell.Main>
     </AppShell>
   );
 };

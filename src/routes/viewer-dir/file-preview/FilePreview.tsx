@@ -17,8 +17,6 @@ const FilePreview = ({ dirPath, ...props }: Props) => {
 
   const isVideo = file?.name.match(/\.(mp4|mov|avi|mkv|webm)$/i);
 
-  console.log("rerender", { dirPath, fileid: file?.id, src, isVideo });
-
   return (
     <div className={css.filePreview} {...props}>
       <Button className={css.closeBtn} onClick={onClose}>
@@ -30,7 +28,7 @@ const FilePreview = ({ dirPath, ...props }: Props) => {
           {isVideo ? (
             <video
               key={file.id ?? "nofile"}
-              className={css.image}
+              className={css.video}
               controls
               src={src}
               muted

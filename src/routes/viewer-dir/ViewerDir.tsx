@@ -9,10 +9,12 @@ import { DirWithFiles } from "../saved-folders/FilesInDirs.type";
 import FilePreview from "./file-preview/FilePreview";
 import File from "./file/File";
 import css from "./ViewerDir.module.css";
+import { useRef } from "react";
 
 const ViewerDir = () => {
   const params = useParams();
   const isPreviewOpen = useStore(currentPreview$, (s) => s.isOpen);
+  const previewRef = useRef<HTMLDivElement>(null);
 
   const dirQuery = useQuery({
     queryKey: ["get_dir", params.dirPath],
@@ -32,7 +34,10 @@ const ViewerDir = () => {
             ))}
           </div>
         </Stack>
-        {isPreviewOpen && <FilePreview dirPath={params.dirPath!} />}
+
+        {isPreviewOpen && (
+          <FilePreview ref={previewRef} dirPath={params.dirPath!} />
+        )}
       </Group>
     </StackContainer>
   );
