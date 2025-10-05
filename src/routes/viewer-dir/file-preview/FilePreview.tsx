@@ -5,6 +5,7 @@ import { useStore } from "zustand";
 import { currentPreview$ } from "../../../stores/currentPreview$";
 import { env } from "../../../util/env";
 import css from "./FilePreview.module.css";
+import { getFileType } from "../../../util/util";
 
 type Props = {
   dirPath: string;
@@ -15,7 +16,7 @@ const FilePreview = ({ dirPath, ...props }: Props) => {
   const src = convertFileSrc(dirPath + "\\" + file?.name);
   const onClose = useStore(currentPreview$, (s) => s.close);
 
-  const isVideo = file?.name.match(/\.(mp4|mov|avi|mkv|webm)$/i);
+  const isVideo = getFileType(file?.name ?? "") === "video";
 
   return (
     <div className={css.filePreview} {...props}>

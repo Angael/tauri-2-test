@@ -6,6 +6,7 @@ import {
 } from "../../saved-folders/FilesInDirs.type";
 import { memo, use, useCallback, useRef } from "react";
 import { path } from "@tauri-apps/api";
+import clsx from "clsx";
 
 export const cacheDirPromise = path.appCacheDir();
 
@@ -34,9 +35,10 @@ const getTileIndex = (percentage: number, tileCount: number) => {
 
 type Props = {
   file: DirWithFiles["files"][number];
+  dir: string;
 };
 
-const Thumbnail = ({ file }: Props) => {
+const Thumbnail = ({ file, dir }: Props) => {
   // Is the thumbnail grid animating on it's own on interval?
   const playing = useRef(true);
   const thumbWithGrid = file.thumbs.find((thumb) => thumb.grid);
@@ -99,13 +101,18 @@ const Thumbnail = ({ file }: Props) => {
   );
   // useCursorSeekThumbnail(file.thumbs[0], imgRef);
 
-  const src = convertFileSrc(`${cacheDir}\\files\\${file.id}\\thumbnail.avif`);
+  const hasUsableThumb = file.thumbs.length > 0;
+  const src = hasUsableThumb
+    ? convertFileSrc(`${cacheDir}\\files\\${file.id}\\thumbnail.avif`)
+    : convertFileSrc(
+        `${dir}\\${file.name}` // Original file as fallback
+      );
 
   return (
     <div className={css.thumbnailWrapper}>
       <img
         ref={imgRef}
-        className={css.thumbnail}
+        className={clsx(css.thumbnail, !hasUsableThumb && css.noThumb)}
         src={src}
         alt={file.name}
         draggable="false"

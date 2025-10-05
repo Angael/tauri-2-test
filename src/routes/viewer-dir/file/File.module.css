@@ -26,6 +26,11 @@
   &:hover {
     filter: brightness(0.8) saturate(1.2);
   }
+
+  &.noThumb {
+    object-position: center center;
+    object-fit: contain;
+  }
 }
 
 .thumbnailWrapper {
