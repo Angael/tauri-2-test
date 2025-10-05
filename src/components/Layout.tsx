@@ -1,19 +1,38 @@
 import {
+  ActionIcon,
   AppShell,
   Burger,
+  Divider,
   Group,
-  NavLink as MantineNavLink
+  NavLink as MantineNavLink,
+  Paper,
+  Stack,
+  Text
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { NavLink, useLocation } from "react-router";
+import { mdiBugOutline, mdiCogOutline, mdiHomeOutline } from "@mdi/js";
+import Icon from "@mdi/react";
+import { NavLink, useLocation, useParams } from "react-router";
 
 type Props = {
   children?: React.ReactNode;
 };
 
+function splitIntoPathAndFolderName(path: string): [string, string] {
+  const parts = path.split(/[/\\]/);
+  const folderName = parts.pop() || "";
+  const dirPath = parts.join("/");
+  return [dirPath, folderName];
+}
+
 const Layout = ({ children }: Props) => {
   const [opened, { toggle }] = useDisclosure(false);
   const location = useLocation();
+  const params = useParams();
+
+  const [dirPath, folderName] = params.dirPath
+    ? splitIntoPathAndFolderName(params.dirPath)
+    : ["", ""];
 
   const isStillViewer = location.pathname.startsWith("/viewer-dir");
 
@@ -30,9 +49,49 @@ const Layout = ({ children }: Props) => {
       <AppShell.Header>
         <Group h="100%" px="md">
           <Burger opened={opened} onClick={toggle} size="sm" />
-          <div style={{ fontWeight: "bold", fontSize: "1.2rem" }}>
-            Camille 2
-          </div>
+          <ActionIcon
+            variant="subtle"
+            color="gray"
+            size="lg"
+            component={NavLink}
+            to="/"
+          >
+            <Icon path={mdiHomeOutline} size={1} />
+          </ActionIcon>
+
+          {dirPath && (
+            <Paper withBorder p="xs" radius="md" bg="gray.0">
+              <Stack gap="0">
+                <Text size="xs" lh="0.7rem">
+                  {dirPath}
+                </Text>
+                <Text fw={600} lh="1.2rem">
+                  {folderName}
+                </Text>
+              </Stack>
+            </Paper>
+          )}
+
+          <Divider orientation="vertical" ml="auto" />
+
+          <ActionIcon
+            variant="subtle"
+            color="gray"
+            size="lg"
+            component={NavLink}
+            to="/debug"
+          >
+            <Icon path={mdiBugOutline} size={1} />
+          </ActionIcon>
+          <ActionIcon
+            variant="subtle"
+            color="gray"
+            size="lg"
+            component={NavLink}
+            to="/config"
+          >
+            <Icon path={mdiCogOutline} size={1} />
+          </ActionIcon>
         </Group>
       </AppShell.Header>
       <AppShell.Navbar p="md">
