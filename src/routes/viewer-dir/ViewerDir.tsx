@@ -1,19 +1,16 @@
 import { Group, LoadingOverlay, Stack, Title } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
+import { useRef } from "react";
 import { useParams } from "react-router";
-import { useStore } from "zustand";
 import StackContainer from "../../components/StackContainer";
-import { currentPreview$ } from "../../stores/currentPreview$";
 import { DirWithFiles } from "../saved-folders/FilesInDirs.type";
 import FilePreview from "./file-preview/FilePreview";
 import File from "./file/File";
 import css from "./ViewerDir.module.css";
-import { useRef } from "react";
 
 const ViewerDir = () => {
   const params = useParams();
-  const isPreviewOpen = useStore(currentPreview$, (s) => s.isOpen);
   const previewRef = useRef<HTMLDivElement>(null);
 
   const dirQuery = useQuery({
@@ -35,9 +32,7 @@ const ViewerDir = () => {
           </div>
         </Stack>
 
-        {isPreviewOpen && (
-          <FilePreview ref={previewRef} dirPath={params.dirPath!} />
-        )}
+        <FilePreview ref={previewRef} dirPath={params.dirPath!} />
       </Group>
     </StackContainer>
   );
