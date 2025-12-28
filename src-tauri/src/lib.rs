@@ -17,11 +17,16 @@ use ffmpeg_sidecar::command::ffmpeg_is_installed;
 use tauri::{Manager, WindowEvent};
 
 // Import command functions to shorten generate_handler references
-use crate::config::config_cmd;
+use crate::config::{config_cmd, nvidia_detection};
 use crate::files_in_dirs::files_in_dirs_cmd;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // Apply NVIDIA compatibility fixes before startup (https://github.com/tahayvr/omarchist/issues/1#issuecomment-3239526768)
+    if let Err(e) = nvidia_detection::setup_nvidia_compatibility() {
+        println!("Failed to setup NVIDIA compatibility: {}", e);
+    }
+    
     tauri::Builder::default()
         .setup(|app| {
             let app_handle = app.handle().clone(); // Use tauri::AppHandle
