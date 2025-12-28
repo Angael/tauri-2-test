@@ -77,7 +77,7 @@ pub fn run() {
             }); // Make AppState available to commands
 
             // TODO: Experiment with number of queue consumers for load balancing
-            for _ in 0..12 {
+            for _ in 0..2 {
                 let queue_for_consumer = event_queue.clone();
                 let app_handle_clone = app_handle.clone();
                 std::thread::spawn(move || {
