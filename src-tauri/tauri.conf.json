@@ -14,7 +14,10 @@
       {
         "title": "tauri-2-test",
         "width": 1100,
-        "height": 700
+        "height": 700,
+        "resizable": true,
+        "acceptFirstMouse": true,
+        "decorations": false
       }
     ],
     "security": {
