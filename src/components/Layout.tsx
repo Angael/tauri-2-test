@@ -13,17 +13,11 @@ import { useDisclosure } from "@mantine/hooks";
 import { mdiBugOutline, mdiCogOutline, mdiHomeOutline } from "@mdi/js";
 import Icon from "@mdi/react";
 import { NavLink, useLocation, useParams } from "react-router";
+import { splitPathAndFilename } from "../util/splitPathAndFilename";
 
 type Props = {
   children?: React.ReactNode;
 };
-
-function splitIntoPathAndFolderName(path: string): [string, string] {
-  const parts = path.split(/[/\\]/);
-  const folderName = parts.pop() || "";
-  const dirPath = parts.join("/");
-  return [dirPath, folderName];
-}
 
 const Layout = ({ children }: Props) => {
   const [opened, { toggle }] = useDisclosure(false);
@@ -31,7 +25,7 @@ const Layout = ({ children }: Props) => {
   const params = useParams();
 
   const [dirPath, folderName] = params.dirPath
-    ? splitIntoPathAndFolderName(params.dirPath)
+    ? splitPathAndFilename(params.dirPath)
     : ["", ""];
 
   const isStillViewer = location.pathname.startsWith("/viewer-dir");

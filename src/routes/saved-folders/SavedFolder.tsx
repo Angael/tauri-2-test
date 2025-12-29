@@ -1,13 +1,20 @@
-import { Button, Group, Stack, Text } from "@mantine/core";
+import { ActionIcon, Card, Menu, Progress, Stack, Text } from "@mantine/core";
+import { mdiMenu, mdiSync, mdiTrashCan } from "@mdi/js";
+import Icon from "@mdi/react";
 import { useMutation } from "@tanstack/react-query";
+import { path } from "@tauri-apps/api";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import numeral from "numeral";
-import { memo, useEffect, useMemo, useState } from "react";
+import { memo, use, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import { DirWithFiles } from "./FilesInDirs.type";
-import { Progress } from "@mantine/core";
 import { DirScanProgressEvent } from "../../types/tauriEvent.type";
+import { DirWithFiles } from "./FilesInDirs.type";
+import { getPreviewThumbsForSavedFolder } from "./getPreviewThumbsForSavedFolder";
+import css from "./SavedFolder.module.css";
+import { splitPathAndFilename } from "../../util/splitPathAndFilename";
+
+const cacheDirPromise = path.appCacheDir();
 
 interface Props {
   dir: DirWithFiles;
@@ -17,6 +24,7 @@ const SavedDir = ({ dir }: Props) => {
   // TODO this is bad, because when it unmounts, progress looks reset
   // TBH the only progression is to mark items as processed, somewhere in tauri state :(
   const [processedElements, setProcessedElements] = useState<number[]>([]);
+  const cacheDir = use(cacheDirPromise);
 
   const resetProcessedElements = () => setProcessedElements([]);
 
@@ -77,60 +85,97 @@ const SavedDir = ({ dir }: Props) => {
     };
   }, []);
 
-  return (
-    <Group wrap="nowrap">
-      <Stack gap="0">
-        <Text w="100%" style={{ wordBreak: "break-word", userSelect: "text" }}>
-          {dir.path}
-        </Text>
-        <Text size="sm" c="gray" style={{ userSelect: "text" }}>
-          {dir.files.length} files, {numeral(stats.totalSize).format("0.00b")}
-        </Text>
-        {processedElements.length > 0 && (
-          <Progress.Root size="xl">
-            <Progress.Section
-              value={(100 * processedElements.length) / dir.files.length}
-            >
-              <Progress.Label>Prepared files</Progress.Label>
-            </Progress.Section>
-          </Progress.Root>
-        )}
-      </Stack>
+  const [path, dirName] = splitPathAndFilename(dir.path);
 
-      <Group wrap="nowrap" ml="auto" style={{ flexShrink: 0 }}>
-        <Button onClick={onOpen} disabled={disabled}>
-          Open
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => {
-            resetProcessedElements();
-            generateThumbs.mutate(dir.path);
-          }}
-          disabled={disabled}
-        >
-          Generate thumbnails
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => {
-            resetProcessedElements();
-            rescanDir.mutate(dir.path);
-          }}
-          disabled={disabled}
-        >
-          Sync
-        </Button>
-        <Button
-          color="red"
-          variant="outline"
-          onClick={() => removeFolderMut.mutate(dir.path)}
-          disabled={disabled}
-        >
-          Delete
-        </Button>
-      </Group>
-    </Group>
+  const firstFewThumbnails = useMemo(
+    () => getPreviewThumbsForSavedFolder(cacheDir, dir, 8),
+    [cacheDir, dir]
+  );
+
+  return (
+    <Card className={css.savedFolder} shadow="md" withBorder onClick={onOpen}>
+      <div className={css.thumbs}>
+        {firstFewThumbnails.map((thumbSrc, i) => (
+          <img key={i} src={thumbSrc} className={css.thumb} />
+        ))}
+      </div>
+
+      <div className={css.cardBody}>
+        <Stack gap="0" style={{ userSelect: "text" }}>
+          <Text c="gray" size="xs" w="100%" style={{ wordBreak: "break-word" }}>
+            {path}
+          </Text>
+          <Text w="100%" style={{ wordBreak: "break-word" }}>
+            {dirName}
+          </Text>
+          <Text size="sm" c="gray">
+            {dir.files.length} files, {numeral(stats.totalSize).format("0.00b")}
+          </Text>
+          {processedElements.length > 0 && (
+            <Progress.Root size="xl">
+              <Progress.Section
+                value={(100 * processedElements.length) / dir.files.length}
+              >
+                <Progress.Label>Prepared files</Progress.Label>
+              </Progress.Section>
+            </Progress.Root>
+          )}
+        </Stack>
+
+        <Menu>
+          <Menu.Target>
+            <ActionIcon
+              variant="light"
+              size="lg"
+              onClick={(e) => e.stopPropagation()}
+              title="Menu"
+              style={{ marginLeft: "auto" }}
+            >
+              <Icon path={mdiMenu} size={1} />
+            </ActionIcon>
+          </Menu.Target>
+
+          <Menu.Dropdown>
+            <Menu.Item
+              leftSection={<Icon path={mdiSync} size={1} />}
+              onClick={(e) => {
+                e.stopPropagation();
+                resetProcessedElements();
+                generateThumbs.mutate(dir.path);
+              }}
+              disabled={disabled}
+            >
+              Regenerate thumbnails
+            </Menu.Item>
+
+            <Menu.Item
+              leftSection={<Icon path={mdiSync} size={1} />}
+              onClick={(e) => {
+                e.stopPropagation();
+                resetProcessedElements();
+                rescanDir.mutate(dir.path);
+              }}
+              disabled={disabled}
+            >
+              Re-sync
+            </Menu.Item>
+
+            <Menu.Divider />
+
+            <Menu.Item
+              color="red"
+              leftSection={<Icon path={mdiTrashCan} size={1} />}
+              onClick={(e) => {
+                e.stopPropagation();
+                removeFolderMut.mutate(dir.path);
+              }}
+            >
+              Stop optimizing directory
+            </Menu.Item>
+          </Menu.Dropdown>
+        </Menu>
+      </div>
+    </Card>
   );
 };
 

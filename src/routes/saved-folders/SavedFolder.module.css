@@ -1,0 +1,43 @@
+.savedFolder {
+  position: relative;
+  overflow: hidden;
+
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.cardBody {
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+  margin-top: 100px;
+  padding: var(--mantine-spacing-sm);
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur();
+  background-color: color-mix(
+    in hsl,
+    var(--mantine-color-white),
+    transparent 10%
+  );
+  border-radius: var(--mantine-radius-md);
+}
+
+.thumbs {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-wrap: nowrap;
+
+  opacity: 1;
+  pointer-events: none;
+
+  .thumb {
+    height: 100%;
+    object-fit: cover;
+  }
+}
