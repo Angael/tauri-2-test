@@ -3,11 +3,11 @@
 pub mod app_state;
 pub mod config;
 pub mod files_in_dirs;
+pub mod serde_utils;
 pub mod state_manager;
 pub mod task_queue;
 pub mod thumb_gen;
 pub mod video;
-pub mod serde_utils;
 
 use crate::app_state::AppState;
 use crate::state_manager::JsonState;
@@ -26,8 +26,9 @@ pub fn run() {
     if let Err(e) = nvidia_detection::setup_nvidia_compatibility() {
         println!("Failed to setup NVIDIA compatibility: {}", e);
     }
-    
+
     tauri::Builder::default()
+        .plugin(tauri_plugin_os::init())
         .setup(|app| {
             let app_handle = app.handle().clone(); // Use tauri::AppHandle
 

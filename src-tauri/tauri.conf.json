@@ -21,7 +21,7 @@
       "csp": "default-src 'self' ipc: *.localhost; img-src 'self' asset: *.localhost; style-src 'self' 'unsafe-inline'",
       "assetProtocol": {
         "enable": true,
-        "scope": ["**"]
+        "scope": ["**", "**/.local/share/**/*", "**/.cache/**/*"]
       }
     }
   },
