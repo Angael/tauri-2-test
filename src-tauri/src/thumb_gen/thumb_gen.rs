@@ -76,7 +76,7 @@ pub fn gen_ffmpeg_vid_tiled_thumb(
         .frames(1)
         .output(output_name.to_str().unwrap());
 
-    println!("FFmpeg command: {:?}", _command);
+    log::debug!("FFmpeg command: {:?}", _command);
 
     let _ = _command.spawn().unwrap().wait();
 

@@ -81,7 +81,7 @@ impl ThreadSafeEventQueue {
 // The consumer thread function.
 pub fn start_event_consumer(queue: ThreadSafeEventQueue, app_handle: AppHandle) {
     thread::spawn(move || {
-        println!("Event consumer thread started.");
+        log::info!("Event consumer thread started.");
 
         // This loop will run forever.
         loop {

@@ -29,7 +29,7 @@ pub fn analyze_video(path: PathBuf) -> Result<VideoStats, String> {
     let info = match ffprobe(&path) {
         Ok(info) => info,
         Err(e) => {
-            eprintln!("Failed to analyze video '{}': {}", filename, e);
+            log::error!("Failed to analyze video '{}': {}", filename, e);
             return Err("Video analysis failed".to_string());
         }
     };
@@ -41,7 +41,7 @@ pub fn analyze_video(path: PathBuf) -> Result<VideoStats, String> {
     {
         Some(stream) => stream,
         None => {
-            eprintln!("No video stream found in '{}'", filename);
+            log::error!("No video stream found in '{}'", filename);
             return Err("No video stream found".to_string());
         }
     };

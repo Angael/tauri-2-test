@@ -6,7 +6,7 @@ use std::fs;
 
 #[tauri::command]
 pub fn get_files_in_dirs(state: tauri::State<AppState>) -> FilesInDirs {
-    println!("get_files_in_dirs");
+    log::debug!("get_files_in_dirs");
 
     state
         .files_in_dirs
@@ -15,7 +15,7 @@ pub fn get_files_in_dirs(state: tauri::State<AppState>) -> FilesInDirs {
 
 #[tauri::command]
 pub fn get_dir(dir: String, state: tauri::State<AppState>) -> Option<DirWithFiles> {
-    println!("get_dir");
+    log::debug!("get_dir");
 
     state
         .files_in_dirs
@@ -24,7 +24,7 @@ pub fn get_dir(dir: String, state: tauri::State<AppState>) -> Option<DirWithFile
 
 #[tauri::command]
 pub fn add_dir(dir: String, state: tauri::State<AppState>) -> Result<(), String> {
-    println!("add_dir: {:?}", dir);
+    log::debug!("add_dir: {:?}", dir);
 
     state
         .files_in_dirs
@@ -33,7 +33,7 @@ pub fn add_dir(dir: String, state: tauri::State<AppState>) -> Result<(), String>
 
 #[tauri::command]
 pub fn remove_dir(dir: String, state: tauri::State<AppState>) -> Result<(), String> {
-    println!("remove_dir: {:?}", dir);
+    log::debug!("remove_dir: {:?}", dir);
 
     let mut file_ids_to_delete: Vec<String> = Vec::new();
     let _ = state.files_in_dirs.with_mut(|files_in_dirs| {
@@ -51,7 +51,7 @@ pub fn remove_dir(dir: String, state: tauri::State<AppState>) -> Result<(), Stri
         let result = fs::remove_dir_all(&state.thumbnail_store.get_file_dir(file_id));
         match result {
             Err(err) => {
-                eprintln!("Err removing thumb dir {}, {}", file_id, err);
+                log::error!("Err removing thumb dir {}, {}", file_id, err);
             }
             _ => (),
         };
@@ -62,7 +62,7 @@ pub fn remove_dir(dir: String, state: tauri::State<AppState>) -> Result<(), Stri
 
 #[tauri::command]
 pub fn rescan_dir(dir: String, state: tauri::State<AppState>) -> Result<(), String> {
-    println!("rescan_dir: {:?}", dir);
+    log::debug!("rescan_dir: {:?}", dir);
 
     remove_dir(dir.clone(), state.clone())?;
 

@@ -24,10 +24,11 @@ use crate::files_in_dirs::files_in_dirs_cmd;
 pub fn run() {
     // Apply NVIDIA compatibility fixes before startup (https://github.com/tahayvr/omarchist/issues/1#issuecomment-3239526768)
     if let Err(e) = nvidia_detection::setup_nvidia_compatibility() {
-        println!("Failed to setup NVIDIA compatibility: {}", e);
+        log::warn!("Failed to setup NVIDIA compatibility: {}", e);
     }
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_log::Builder::new().build())
         .plugin(tauri_plugin_os::init())
         .setup(|app| {
             let app_handle = app.handle().clone(); // Use tauri::AppHandle
@@ -39,11 +40,11 @@ pub fn run() {
                 .expect("Failed to get application data directory. Please ensure it's configured.");
 
             // Print paths
-            println!("app_data_dir: {}", app_data_dir.display());
+            log::info!("app_data_dir: {}", app_data_dir.display());
 
             if ffmpeg_is_installed() {
-                println!("FFmpeg is already installed! 🎉");
-                println!("TIP: Use `auto_download()` to skip manual customization.");
+                log::info!("FFmpeg is already installed! 🎉");
+                log::info!("TIP: Use `auto_download()` to skip manual customization.");
             } else {
                 todo!("FFmpeg is not installed. Please install it manually or use `auto_download()` to download it automatically.");
             }
@@ -61,13 +62,13 @@ pub fn run() {
                 if let WindowEvent::CloseRequested { .. } = event {
                     // Perform blocking saves to ensure data persistence before shutdown
                     if let Err(e) = app_config_clone.force_save_blocking() {
-                        eprintln!("Failed to save app config on shutdown: {}", e);
+                        log::error!("Failed to save app config on shutdown: {}", e);
                     }
                     if let Err(e) = files_in_dirs_clone.force_save_blocking() {
-                        eprintln!("Failed to save files_in_dirs on shutdown: {}", e);
+                        log::error!("Failed to save files_in_dirs on shutdown: {}", e);
                     }
                     if let Err(e) = event_queue_clone.force_save_blocking() {
-                        eprintln!("Failed to save files_in_dirs on shutdown: {}", e);
+                        log::error!("Failed to save files_in_dirs on shutdown: {}", e);
                     }
                     
                     // Close the window after saving

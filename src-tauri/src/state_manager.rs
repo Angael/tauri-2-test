@@ -32,14 +32,14 @@ where
     pub fn load(path: PathBuf) -> Self {
         let path_with_ext = path.with_extension("msgpack");
         let state = if path_with_ext.exists() {
-            println!("Loading state from: {}", path_with_ext.display());
+            log::info!("Loading state from: {}", path_with_ext.display());
 
             // Load from MessagePack format for efficiency
             fs::read(&path_with_ext)
                 .ok()
                 .and_then(|content| rmp_serde::from_slice(&content).ok())
                 .unwrap_or_else(|| {
-                    eprintln!(
+                    log::error!(
                         "Failed to read or parse MessagePack file at: {}",
                         path_with_ext.display()
                     );
@@ -82,7 +82,7 @@ where
             .map_err(|e| format!("Failed to serialize state to msgpack: {}", e))?;
         let msgpack_path = self.path.with_extension("msgpack");
 
-        println!("Saving state (synchronous)");
+        log::debug!("Saving state (synchronous)");
         fs::write(self.path.with_extension("json"), data)
             .map_err(|e| format!("Failed to write to disk: {}", e))?;
 
@@ -185,16 +185,16 @@ where
 
                 // Perform the actual save
                 if let Err(e) = Self::save_state_to_disk(&state, &path) {
-                    eprintln!("Background save error: {}", e);
+                    log::error!("Background save error: {}", e);
                 } else {
-                    println!("Background save completed");
+                    log::debug!("Background save completed");
                     last_save_time = now;
                     last_request = None; // Clear the request after successful save
                 }
             }
         }
 
-        println!("Background save thread shutting down");
+        log::debug!("Background save thread shutting down");
     }
     /// Internal method to save state to disk in both JSON and MessagePack formats.
     /// Used by both the background save thread and the legacy synchronous save method.

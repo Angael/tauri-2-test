@@ -47,9 +47,10 @@ pub fn handle_task_generate_thumb(task: GenerateThumbTask, app_handle: &tauri::A
     {
         Some(file) => file,
         None => {
-            eprintln!(
+            log::error!(
                 "File with ID '{}' not found in directory '{}'",
-                task.id, task.dir
+                task.id,
+                task.dir
             );
             return;
         }
@@ -57,7 +58,7 @@ pub fn handle_task_generate_thumb(task: GenerateThumbTask, app_handle: &tauri::A
 
     let file_type = get_file_type(&file.name);
     if file_type == FileType::Other {
-        println!("Skipping \"other\" file: {}", file.name);
+        log::debug!("Skipping \"other\" file: {}", file.name);
         app_handle.emit("dir_scan_progress", task).unwrap();
         return;
     }
@@ -80,12 +81,12 @@ pub fn handle_task_generate_thumb(task: GenerateThumbTask, app_handle: &tauri::A
     };
 
     if let Ok(thumb_data) = thumb {
-        println!("thumb data {} {:?}", file.name, thumb_data);
+        log::debug!("thumb data {} {:?}", file.name, thumb_data);
         let _ = app_handle.state::<AppState>().files_in_dirs.with_mut(|s| {
             if let Some(file) = s.find_file_mut(&task.dir, &task.id) {
                 file.thumbs.push(thumb_data);
             } else {
-                eprintln!("File '{}' not found in directory '{}'", file.name, task.dir);
+                log::error!("File '{}' not found in directory '{}'", file.name, task.dir);
             }
         });
     }

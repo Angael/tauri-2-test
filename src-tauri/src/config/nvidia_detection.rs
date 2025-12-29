@@ -6,7 +6,7 @@ use std::process::Command;
 pub fn setup_nvidia_compatibility() -> Result<(), Box<dyn std::error::Error>> {
     if is_nvidia_system()? {
         env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
-        println!("NVIDIA graphics detected - applied WebKit compatibility fix");
+        log::info!("NVIDIA graphics detected - applied WebKit compatibility fix");
     }
     Ok(())
 }
