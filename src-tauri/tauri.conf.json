@@ -21,10 +21,25 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self' ipc: *.localhost; img-src 'self' asset: *.localhost; style-src 'self' 'unsafe-inline'",
+      "csp": {
+        "default-src": "'self' ipc: *.localhost",
+        "img-src": "'self' asset: *.localhost",
+        "style-src": "'self' 'unsafe-inline'",
+        "script-src": "'self' 'unsafe-eval'",
+        "media-src": "'self' asset: *.localhost"
+      },
       "assetProtocol": {
         "enable": true,
-        "scope": ["**", "**/.local/share/**/*", "**/.cache/**/*"]
+        "scope": [
+          "**",
+          "**/.local/share/**/*",
+          "**/.cache/**/*",
+          "$APPDATA/**",
+          "$APPLOCALDATA/**",
+          "$APPDATA/*/**",
+          "$APPLOCALDATA/*/**",
+          "$HOME/**"
+        ]
       }
     }
   },
