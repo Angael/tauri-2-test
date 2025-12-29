@@ -9,6 +9,12 @@ A modern desktop application built with Tauri 2, React 19, and TypeScript. Featu
 - [Rust](https://rustup.rs/) (Latest stable)
 - [Bun](https://bun.sh/) (Fast JavaScript runtime and package manager)
 - [Tauri CLI](https://tauri.app/v1/guides/getting-started/prerequisites/)
+- On Linux: gstreamer and plugins (for media handling)
+
+```bash
+# Only on linux
+sudo pacman -S gstreamer gst-plugins-base gst-plugins-good gst-plugins-bad gst-plugins-ugly gst-libav
+```
 
 ### Installation
 

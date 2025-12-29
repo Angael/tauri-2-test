@@ -9,7 +9,7 @@ export const getPreviewThumbsForSavedFolder = (
 ): string[] => {
   const thumbs: string[] = [];
   for (const file of dir.files.reverse()) {
-    for (const thumb of file.thumbs) {
+    for (const _thumb of file.thumbs) {
       let usable = true; // TODO: determine if usable
       if (usable) {
         thumbs.push(
