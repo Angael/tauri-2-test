@@ -7,6 +7,7 @@ import {
 import { memo, use, useCallback, useRef } from "react";
 import { path } from "@tauri-apps/api";
 import clsx from "clsx";
+import { joinPath } from "../../../util/pathSlash";
 
 export const cacheDirPromise = path.appCacheDir();
 
@@ -103,10 +104,8 @@ const Thumbnail = ({ file, dir }: Props) => {
 
   const hasUsableThumb = file.thumbs.length > 0;
   const src = hasUsableThumb
-    ? convertFileSrc(`${cacheDir}\\files\\${file.id}\\thumbnail.avif`)
-    : convertFileSrc(
-        `${dir}\\${file.name}` // Original file as fallback
-      );
+    ? convertFileSrc(joinPath(cacheDir, "files", file.id, "thumbnail.avif"))
+    : convertFileSrc(joinPath(dir, file.name));
 
   return (
     <div className={css.thumbnailWrapper}>

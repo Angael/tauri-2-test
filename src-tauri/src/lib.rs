@@ -3,11 +3,11 @@
 pub mod app_state;
 pub mod config;
 pub mod files_in_dirs;
+pub mod serde_utils;
 pub mod state_manager;
 pub mod task_queue;
 pub mod thumb_gen;
 pub mod video;
-pub mod serde_utils;
 
 use crate::app_state::AppState;
 use crate::state_manager::JsonState;
@@ -17,12 +17,18 @@ use ffmpeg_sidecar::command::ffmpeg_is_installed;
 use tauri::{Manager, WindowEvent};
 
 // Import command functions to shorten generate_handler references
-use crate::config::config_cmd;
+use crate::config::{config_cmd, nvidia_detection};
 use crate::files_in_dirs::files_in_dirs_cmd;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // Apply NVIDIA compatibility fixes before startup (https://github.com/tahayvr/omarchist/issues/1#issuecomment-3239526768)
+    if let Err(e) = nvidia_detection::setup_nvidia_compatibility() {
+        println!("Failed to setup NVIDIA compatibility: {}", e);
+    }
+
     tauri::Builder::default()
+        .plugin(tauri_plugin_os::init())
         .setup(|app| {
             let app_handle = app.handle().clone(); // Use tauri::AppHandle
 
@@ -77,7 +83,7 @@ pub fn run() {
             }); // Make AppState available to commands
 
             // TODO: Experiment with number of queue consumers for load balancing
-            for _ in 0..12 {
+            for _ in 0..2 {
                 let queue_for_consumer = event_queue.clone();
                 let app_handle_clone = app_handle.clone();
                 std::thread::spawn(move || {

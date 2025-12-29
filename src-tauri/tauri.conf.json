@@ -14,14 +14,17 @@
       {
         "title": "tauri-2-test",
         "width": 1100,
-        "height": 700
+        "height": 700,
+        "resizable": true,
+        "acceptFirstMouse": true,
+        "decorations": false
       }
     ],
     "security": {
       "csp": "default-src 'self' ipc: *.localhost; img-src 'self' asset: *.localhost; style-src 'self' 'unsafe-inline'",
       "assetProtocol": {
         "enable": true,
-        "scope": ["**"]
+        "scope": ["**", "**/.local/share/**/*", "**/.cache/**/*"]
       }
     }
   },

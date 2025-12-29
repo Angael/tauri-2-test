@@ -6,6 +6,7 @@ import { currentPreview$ } from "../../../stores/currentPreview$";
 import { env } from "../../../util/env";
 import css from "./FilePreview.module.css";
 import { getFileType } from "../../../util/util";
+import { joinPath } from "../../../util/pathSlash";
 
 type Props = {
   dirPath: string;
@@ -13,7 +14,7 @@ type Props = {
 
 const FilePreview = ({ dirPath, ...props }: Props) => {
   const file = useStore(currentPreview$, (s) => s.file);
-  const src = convertFileSrc(dirPath + "\\" + file?.name);
+  const src = convertFileSrc(joinPath(dirPath, file?.name ?? ""));
   const onClose = useStore(currentPreview$, (s) => s.close);
 
   const isVideo = getFileType(file?.name ?? "") === "video";
